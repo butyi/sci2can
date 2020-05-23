@@ -258,7 +258,7 @@ PCB development environment on works also on Linux.
 It works well, I really like to use it. I was so satisfied, I have donated the
 project through [Linux Foundation.](https://www.linuxfoundation.org/).
 I have exported schematic in PDF for those who do not have KiCad installed.
-[Here is schematic](https://github.com/butyi/sci2can/raw/master/pics/sci2can_sch.pdf).
+[Here is schematic](https://github.com/butyi/sci2can/raw/master/hw/sci2can_sch.pdf).
 
 Designed PCB is a small board with size 31x32 mm.
 Here are some pictures about the board design in KiCad.
