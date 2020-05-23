@@ -25,7 +25,17 @@ Software is simple pure and assembly code. Funny, it is just 454 bytes long.
 To understand my description below you may need to look at the related part in
 [processor reference manual](https://www.nxp.com/docs/en/data-sheet/MC9S08DZ60.pdf).
 
-#### I/O ports
+#### Central Processor Unit (S08CPUV3)
+ 
+Regarding assembly commands read
+[HCS08RMV1.pdf](https://www.nxp.com/docs/en/reference-manual/HCS08RMV1.pdf).
+Now (when I am writing this) it is not available on this link even though
+I have downloaded from here some weeks before. Try to search it on the Internet.
+My most often read parts are
+- Instruction Set Summary (6 sheets)
+- Branch summary table on sheet of Branch Always instruction
+
+#### Parallel Input/Output Control
 
 To prevent extra current consumption caused by flying not connected input ports,
 all ports shall be configured as output. I have configured ports to low level
@@ -35,7 +45,7 @@ initialization is not proper. For example inputs pins.
 This default initialization is proper for FET and OSCILL_SUPP pins, so there is
 no specific code for these pins.
 
-#### Multi-purpose Clock Generator (MCG)
+#### Multi-purpose Clock Generator (S08MCGV1)
 
 MCG is configured to PEE mode. But this mode can be reached through other modes.
 See details in
@@ -61,7 +71,7 @@ Really 8 Mhz, because 8 MHz is 125ns, 10 cycle is 1250ns, which can be seen betw
 
 ![osc_busclk](https://github.com/butyi/sci2can/raw/master/pics/osc_busclk.png)
 
-#### Serial Communications Interface (SCI)
+#### Serial Communications Interface (S08SCIV4)
 
 SCI clock is driven by Bus Clock. Maximal baud rate is Bus Clock divided by 16.
 Since my Bus Clock is 8MHz, maximum baud rate is 500k baud. Now I just need
@@ -74,7 +84,7 @@ line after active period. I use this event to recognize end of data packet
 reception. At this moment CAN transmission can be initiated (if packet looks
 good) and prepare SCI to next packet.
 
-#### Controller Area Network (CAN)
+#### Freescale Controller Area Network (S08MSCANV1)
 
 Regarding CAN clock it is proposed to use external clock directly. With 4MHz
 crystal maximum baud rate is 500k baud. This is enough for my needs.
@@ -184,13 +194,6 @@ enable, faling edge is end of last CAN Tx interrupt.
 - Blue is SCI Rx burst, red is SCI Rx interrupt execution.
 
 ![SCI_and_CAN_burst](https://github.com/butyi/sci2can/raw/master/pics/sci_burst_and_isr.png)
-
-### References
- 
-Regarding assembly commands read
-[HCS08RMV1.pdf](https://www.nxp.com/docs/en/reference-manual/HCS08RMV1.pdf).
-Now (when I am writing this) it is not available on this link even though
-I have downloaded from here some weeks before. Try to search it on the Internet.
 
 ### Compile
 
