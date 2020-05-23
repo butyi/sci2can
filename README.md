@@ -139,38 +139,49 @@ parts can be can be watched on not used uC pins by oscilloscope.
 Here are oscilloscope screenshots about software activity.
 
 - Blue is SCI line. Bursts are visible.
+
 ![SCI_line](https://github.com/butyi/sci2can/raw/master/pics/sci_line.png)
 
 - Blue is SCI Bursts. Red is PTE0 pin, where rising edge is first Rx interrupt
 after the idle period, faling edge is idle interrupt.
+
 ![PTE0_SCI_burst](https://github.com/butyi/sci2can/raw/master/pics/pte0_sci_burst.png)
 
 - Blue is SCI Bursts. Red is PTE1 pin, where rising edge is CAN Tx interrupt
 enable, faling edge is end of last CAN Tx interrupt.
+
 ![PTE1_CAN_burst](https://github.com/butyi/sci2can/raw/master/pics/pte1_can_burst.png)
 
 - Blue is SCI Bursts. Red is PTE4 pin, high during SCI Rx interrupt execution.
+
 ![PTE4_SCI_ISR](https://github.com/butyi/sci2can/raw/master/pics/pte4_sci_isr.png)
 
 - Blue is SCI Bursts. Red is PTE5 pin, high during CAN Tx interrupt execution.
+
 ![PTE5_CAN_ISR](https://github.com/butyi/sci2can/raw/master/pics/pte5_can_isr.png)
 
 - Blue is PTE3 pin, high during RTC periodic timer interrupt execution.
+
 ![PTE3_RTC_ISR](https://github.com/butyi/sci2can/raw/master/pics/pte3_rtc_isr.png)
 
 - Blue is PTE3 pin, lenth of RTC periodic timer interrupt execution.
+
 ![PTE3_RTC_ISR_len](https://github.com/butyi/sci2can/raw/master/pics/pte3_rtc_isr_len.png)
 
 - Blue is PTE4 pin, lenth of SCI Rx interrupt execution.
+
 ![PTE4_SCI_ISR_len](https://github.com/butyi/sci2can/raw/master/pics/pte4_sci_isr_len.png)
 
 - Blue is PTE5 pin, lenth of CAN Tx interrupt execution.
+
 ![PTE5_CAN_ISR_len](https://github.com/butyi/sci2can/raw/master/pics/pte5_can_isr_len.png)
 
 - Blue is SCI Rx bursts, red is CAN Tx burst.
+
 ![SCI_and_CAN_burst](https://github.com/butyi/sci2can/raw/master/pics/sci_and_can_burst.png)
 
 - Blue is SCI Rx burst, red is SCI Rx interrupt execution.
+
 ![SCI_and_CAN_burst](https://github.com/butyi/sci2can/raw/master/pics/sci_burst_and_isr.png)
 
 ### References
