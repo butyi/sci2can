@@ -136,7 +136,7 @@ first byte of message in the SCI buffer multiplied by 8. This means
 #### Debug support
 
 If OSCILL_SUPP is enabled by compiler switch, execution timing of software
-parts can be can be watched on not used uC pins by oscilloscope.
+parts can be watched on not used uC pins by oscilloscope.
 Here are oscilloscope screenshots about software activity.
 
 - Blue is SCI line. Bursts are visible.
