@@ -165,15 +165,15 @@ enable, faling edge is end of last CAN Tx interrupt.
 
 ![PTE3_RTC_ISR](https://github.com/butyi/sci2can/raw/master/pics/pte3_rtc_isr.png)
 
-- Blue is PTE3 pin, lenth of RTC periodic timer interrupt execution.
+- Blue is PTE3 pin, length of RTC periodic timer interrupt execution.
 
 ![PTE3_RTC_ISR_len](https://github.com/butyi/sci2can/raw/master/pics/pte3_rtc_isr_len.png)
 
-- Blue is PTE4 pin, lenth of SCI Rx interrupt execution.
+- Blue is PTE4 pin, length of SCI Rx interrupt execution.
 
 ![PTE4_SCI_ISR_len](https://github.com/butyi/sci2can/raw/master/pics/pte4_sci_isr_len.png)
 
-- Blue is PTE5 pin, lenth of CAN Tx interrupt execution.
+- Blue is PTE5 pin, length of CAN Tx interrupt execution.
 
 ![PTE5_CAN_ISR_len](https://github.com/butyi/sci2can/raw/master/pics/pte5_can_isr_len.png)
 
