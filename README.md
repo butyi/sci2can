@@ -59,7 +59,7 @@ I have measured bus clock by this code.
 
 ![osc_busclk](https://github.com/butyi/sci2can/raw/master/pics/osc_busclk.png)
 
-Really 8Mhz.
+Really 8 Mhz, because 8 MHz is 125ns, 10 cycle is 1250ns, which can be seen between edges.
 
 #### Serial Communications Interface (SCI)
 
