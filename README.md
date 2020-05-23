@@ -49,11 +49,17 @@ Bus frequency is only 8MHz now, while theoretical maximum is 20MHz.
 So here there is improvement potential if software execution is not enough fast.
 
 I have measured bus clock by this code.
+
 `        ldhx    #PTB`
+
 `MAIN`
+
 `        lda     ,x      ; 3 cycles`
+
 `        eor     #PIN3_  ; 2 cycles`
+
 `        sta     ,x      ; 2 cycles`
+
 `        bra     MAIN    ; 3 cycles`
 
 ![osc_busclk](https://github.com/butyi/sci2can/raw/master/pics/osc_busclk.png)
