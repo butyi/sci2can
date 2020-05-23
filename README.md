@@ -11,7 +11,7 @@ to be available on CAN based tool-chain for analysis purpose.
 
 I decided, this is the perfect moment to get use S08D family, because this
 supports faster SCI baud rates than GZ family what I know well.
-Therefore I searched my dusty DEMO9S08DZ60 demo board in the cupboard.
+Therefore I searched my dusty DEMO9S08DZ60 demo board in the deep of cupboard.
 
 ![demo9s08dz60](https://github.com/butyi/sci2can/raw/master/pics/demo9s08dz60.jpg)
 
