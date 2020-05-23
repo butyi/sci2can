@@ -278,8 +278,8 @@ Here are some pictures about the board design in KiCad.
 ![pcbw6](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbw6.png)
 
 PCBs were produced by [SOS PCB Kft.](https://nyakexpressz.hu/). I am satisfied
-with quality of production. Please note, I just have produced 1v0 revision
-board, but the KiCad files are already 1v1, where findings were fixed.  
+with quality of production. Please note, I just have produced V1.00 revision
+board, but the KiCad files are already V1.01, where findings were fixed.  
 
 ![pcb1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcb1.jpg)
 
