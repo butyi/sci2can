@@ -9,11 +9,6 @@ This project was developed to receive large data packets from SCI
 (RS232 UART without MAX232 line driver) and forward data to CAN
 to be available on CAN based tool-chain for analysis purpose.
 
-SCI data already contain information about ID of CAN message to be sent.
-SCI uses fast baud rate.
-This is why GZ family is not appropriate what I know well.
-Therefore  uC was needed to get use.
-
 I decided, this is the perfect moment to get use S08D family, because this
 supports faster SCI baud rates than GZ family what I know well.
 Therefore I searched my dusty DEMO9S08DZ60 demo board in the cupboard.
