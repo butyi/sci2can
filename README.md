@@ -56,7 +56,7 @@ I have measured bus clock by this code.
 `        sta     ,x      ; 2 cycles`
 `        bra     MAIN    ; 3 cycles`
 
-![osc_busclk](https://github.com/butyi/sci2can/raw/master/pics/osc_busclk.pgn)
+![osc_busclk](https://github.com/butyi/sci2can/raw/master/pics/osc_busclk.png)
 
 Really 8Mhz.
 
@@ -88,7 +88,7 @@ After CAN module initialization, an info message is sent to CAN. This contains
 software identification information, like application identifier, software
 revision, build date.
 
-![can_info_message](https://github.com/butyi/sci2can/raw/master/pics/can_info_message.pgn)
+![can_info_message](https://github.com/butyi/sci2can/raw/master/pics/can_info_message.png)
 
 ### Main loop
 
@@ -424,7 +424,7 @@ bootloader.
 
 I have selected this box:
 
-![box](https://github.com/butyi/sci2can/raw/master/pics/box.pgn)
+![box](https://github.com/butyi/sci2can/raw/master/pics/box.png)
 
 Simple, cheap, small. Perfect.
 
