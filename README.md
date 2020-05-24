@@ -413,13 +413,17 @@ board, but the KiCad files are already V1.01, where findings were fixed.
 
 ![pcb2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcb2.jpg)
 
-Next pictures about mounting parts.
+### Mounting
+
+It is proposed to mount first R and C components on the bottom side.
 
 ![pcbm1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbm1.jpg)
 
-![pcbm2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbm2.jpg)
+Next is the larger parts on top side. Can be visible here mounting of not
+designed power supply board is not so professional but sufficient for country.
+:smile:
 
-![pcbm3](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbm3.jpg)
+![pcbm2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbm2.jpg)
 
 ### Box
 
@@ -451,7 +455,7 @@ without profit.
 
 ### Workshop
 
-Finally here is a picture about my workshop corner. :-) 
+Finally here is a picture about my workshop corner. :simple_smile:
 
 ![workshop](https://github.com/butyi/sci2can/raw/master/pics/workshop.jpg)
 
@@ -463,7 +467,7 @@ This is free. You can do anything you want with it.
 While I am using Linux, I got so many support from free projects,
 I am happy if I can give something for the community.
 
-## Remarks
+## Notes
 
 I have used `mogrify -resize 640x640\> *` command to downsize the images.
 Here `\>` means only shrink larger images and do not enlarge.
