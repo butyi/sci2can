@@ -306,7 +306,7 @@ there. But on high frequency (baud rate) its reactance is about 1kOhm, which
 still OK for communication.
 Here is a screenshot about shape of SCI signal on the uC pin (RxD1).
 
-![SCI_bits](https://github.com/butyi/sci2can/raw/master/pics/SCI_bits.png)
+![sci_bits](https://github.com/butyi/sci2can/raw/master/pics/sci_bits.png)
 
 ### CAN output
 
