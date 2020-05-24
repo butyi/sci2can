@@ -278,7 +278,7 @@ used. That is high efficiency in same size and same pinout.
 Search "7805 replacement switching regulator" on Internet.
 Unfortunatey what I have damaged on 25V input. Therefore I needed to use a bit
 bigger one. This contains MP1584, with maximal input voltage 30V. But my plan
-is to use MP4560 instead, which can be used up to 55V.
+is to use MP4560 instead, which can be used up to 55V or MAX5035 up to 76V.
 There are some filter capacitors around. Once is at the microcontroller.
 Finally there is the optional power LED (D2). It shows power on state, when
 +5V is available.
