@@ -455,7 +455,7 @@ without profit.
 
 ### Workshop
 
-Finally here is a picture about my workshop corner. :simple_smile:
+Finally here is a picture about my workshop corner. :smile:
 
 ![workshop](https://github.com/butyi/sci2can/raw/master/pics/workshop.jpg)
 
