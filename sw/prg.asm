@@ -244,17 +244,17 @@ RTC_Init
 ; will not happen. This means, bits (events) can only be set in the order.
 ; Therefore only the following values are possible:
 ; - #$1: Only POWERED, no byte was received from SCI. (LED flash: ___X)
-; - #$3: Some bytes were received from SCI. (LED flash: __XX)
-; - #$7: All bytes of burst were received from CAN. (LED flash: _XXX)
+; - #$3: Some bytes were received from SCI but not enough. (LED flash: __XX)
+; - #$7: All bytes of burst were received from SCI. (LED flash: _XXX)
 ; - #$F: All bytes were transmitted on CAN successfully. (LED flash: XXXX)
 ; Below 250ms task will go through on these bits in the above order and set LED
 ; On if the current bit is set. So, the following error codes are visible on LED.
 ; - ___X, Short 25% flash: There is no SCI communication.
-;   Check cable, check if signal on SCI line 
+;   Check proper connection, cable, check signal on SCI line. 
 ; - __XX, Medium 50% flash: SCI burst is short, received bytes are not enough.
-;   Check if proper ECU, proper system is connected to SCI 
+;   Check if transmitter system and baud rate are proper. 
 ; - _XXX, Long 75% flash: SCI is OK, but data cannot be sent to CAN.
-;   Check CAN lines (Low and High), Check CAN baud rate (shall be 500k)  
+;   Check CAN lines (Low and High), Check CAN baud rate (shall be 250k)  
 ; - XXXX, Always On: Everything are OK, data is gatewayed to CAN properly.
 RTC_IT
         bset    RTIF.,RTCSC     ; Clear flag
@@ -298,7 +298,7 @@ RTC_IT_end
         
 ; ------------------------------------------------------------------------------
 ; Freescale Controller Area Network (S08MSCANV1)
-; Set up CAN for 500 kbit/s using 4 MHz external clock
+; Set up CAN for 250 kbit/s using 4 MHz external clock
 ; CAN will use in interrupt mode, but init does not enable interrupt.
 ; It will be enabled when transmission can be started, so when
 ; all bytes have been received from SCI.
