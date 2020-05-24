@@ -429,8 +429,6 @@ Here are pictures about prototype.
 
 ![box2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_box2.jpg)
 
-![proto1](https://github.com/butyi/sci2can/raw/master/pics/prototype_finished.jpg)
-
 I have ordered this box for null-series:
 
 ![box](https://github.com/butyi/sci2can/raw/master/pics/box.png)
