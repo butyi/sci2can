@@ -55,17 +55,7 @@ So here there is improvement potential if software execution is not enough fast.
 
 I have measured bus clock by this code.
 
-`        ldhx    #PTB`
-
-`MAIN`
-
-`        lda     ,x      ; 3 cycles`
-
-`        eor     #PIN3_  ; 2 cycles`
-
-`        sta     ,x      ; 2 cycles`
-
-`        bra     MAIN    ; 3 cycles`
+![busclkmeascode](https://github.com/butyi/sci2can/raw/master/pics/busclkmeascode.png)
 
 Really 8 Mhz, because 8 MHz is 125ns, 10 cycle is 1250ns, which can be seen between edges.
 
@@ -318,6 +308,9 @@ similar to development board circuit.
 ### Connector
 
 Connector has a 6 pins screw connector for wires. I used what I have at home.
+
+![connector](https://github.com/butyi/sci2can/raw/master/pics/connector.jpg)
+
 The connector is not necessary to be mounted, wires can be soldered directly
 into the holes. It saves some money and size.
 
@@ -469,6 +462,11 @@ Left side there is russian microscope, right is also russian soldering iron.
 This is free. You can do anything you want with it.
 While I am using Linux, I got so many support from free projects,
 I am happy if I can give something for the community.
+
+## Remarks
+
+I have used `mogrify -resize 640x640\> *` command to downsize the images.
+Here `\>` means only shrink larger images and do not enlarge.
 
 ## Keywords
 
