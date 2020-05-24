@@ -377,6 +377,8 @@ bootloader.
 
 ### Printed Circuit Board
 
+#### Design
+
 PCB was designed on [KiCad](https://kicad-pcb.org/), which is a free
 PCB development environment on works also on Linux.
 It works well, I really like to use it. I was so satisfied, I have donated the
@@ -404,6 +406,8 @@ Here are some pictures about the board design in KiCad.
 ![pcbw5](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbw5.png)
 
 ![pcbw6](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbw6.png)
+
+#### Production
 
 PCBs were produced by [SOS PCB Kft.](https://nyakexpressz.hu/). I am satisfied
 with quality of production. Please note, I just have produced V1.00 revision
