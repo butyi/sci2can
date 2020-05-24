@@ -283,7 +283,7 @@ Here are some pictures about the board design in KiCad.
 
 PCBs were produced by [SOS PCB Kft.](https://nyakexpressz.hu/). I am satisfied
 with quality of production. Please note, I just have produced V1.00 revision
-board, but the KiCad files are already V1.01, where findings were fixed.  
+board, but the KiCad files are already V1.01, where findings were fixed.
 
 ![pcb1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcb1.jpg)
 
@@ -428,17 +428,19 @@ bootloader.
 
 ### Box
 
-I have selected this box:
-
-![box](https://github.com/butyi/sci2can/raw/master/pics/box.png)
-
-Simple, cheap, small. Perfect.
-
-Here are pictures about prototype with a different but similar box.
+Here are pictures about prototype.
 
 ![box1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_box1.jpg)
 
 ![box2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_box2.jpg)
+
+![proto1](https://github.com/butyi/sci2can/raw/master/pics/prototype_finished.jpg)
+
+I have ordered this box for null-series:
+
+![box](https://github.com/butyi/sci2can/raw/master/pics/box.png)
+
+Simple, cheap, small. Perfect.
 
 ### Costs
 
