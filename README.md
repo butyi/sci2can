@@ -18,7 +18,7 @@ Therefore I searched my dusty DEMO9S08DZ60 demo board in the deep of cupboard.
 
 ## Software
 
-Software is simple pure and assembly code. Funny, it is just 454 bytes long.
+Software is pure assembly code. Funny, it is just 454 bytes long.
 
 ### Modules
 
@@ -30,10 +30,12 @@ To understand my description below you may need to look at the related part in
 Regarding assembly commands read
 [HCS08RMV1.pdf](https://www.nxp.com/docs/en/reference-manual/HCS08RMV1.pdf).
 Now (when I am writing this) it is not available on this link even though
-I have downloaded from here some weeks before. Try to search it on the Internet.
+I have downloaded from here some weeks before. I have stored it
+[here](https://github.com/butyi/sci2can/raw/master/hw/HCS08RMV1.pdf).
+
 My most often read parts are
-- Instruction Set Summary (6 sheets)
-- Branch summary table on sheet of Branch Always instruction
+- Instruction Set Summary (from page 121)
+- Branch summary table on sheet of BRA instruction (page 232)
 
 #### Parallel Input/Output Control
 
@@ -307,12 +309,12 @@ similar to development board circuit.
 
 ### Connector
 
-Connector has a 6 pins screw connector for wires. I used what I have at home.
+I used what I have at home. It is two 3 pins screw connector for wires. 
 
 ![connector](https://github.com/butyi/sci2can/raw/master/pics/connector.jpg)
 
 The connector is not necessary to be mounted, wires can be soldered directly
-into the holes. It saves some money and size.
+into the holes. It saves some money and height.
 
 ### Power supply
 
