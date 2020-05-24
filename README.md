@@ -458,9 +458,11 @@ without profit.
 
 ### Workshop
 
-Finally here is a picture about my workshop corner. :-)
+Finally here is a picture about my workshop corner. :-) 
 
 ![workshop](https://github.com/butyi/sci2can/raw/master/pics/workshop.jpg)
+
+Left side there is russian microscope, right is also russian soldering iron.
 
 ## License
 
