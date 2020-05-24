@@ -243,52 +243,6 @@ specific PCB.
 - Standard BDM port for software download.
 - Small board with direct wire connection (not specific connector).
 
-### Printed Circuit Board
-
-PCB was designed on [KiCad](https://kicad-pcb.org/), which is a free
-PCB development environment on works also on Linux.
-It works well, I really like to use it. I was so satisfied, I have donated the
-project through [Linux Foundation.](https://www.linuxfoundation.org/).
-I have exported schematic in PDF for those who do not have KiCad installed.
-[Here is schematic](https://github.com/butyi/sci2can/raw/master/hw/sci2can_sch.pdf).
-
-Designed PCB is a small board with size 31x32 mm.
-Here are some pictures about the board design in KiCad.
-
-![pcbd1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbd1.png)
-
-![pcbd2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbd2.png)
-
-![pcbd3](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbd3.png)
-
-![pcbw1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbw1.png)
-
-![pcbw2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbw2.png)
-
-![pcbw3](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbw3.png)
-
-![pcbw4](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbw4.png)
-
-![pcbw5](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbw5.png)
-
-![pcbw6](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbw6.png)
-
-PCBs were produced by [SOS PCB Kft.](https://nyakexpressz.hu/). I am satisfied
-with quality of production. Please note, I just have produced V1.00 revision
-board, but the KiCad files are already V1.01, where findings were fixed.
-
-![pcb1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcb1.jpg)
-
-![pcb2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcb2.jpg)
-
-Next pictures about mounting parts.
-
-![pcbm1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbm1.jpg)
-
-![pcbm2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbm2.jpg)
-
-![pcbm3](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbm3.jpg)
-
 ### Microcontroller
 
 I have used MC9S08DZ60. It is enough for such a small project like this.
@@ -420,6 +374,52 @@ these two not used BDM pins.
 I know that these ports are same with CAN Rx and Tx ports on 32pins package,
 but the bootloader will not use CAN and transceiver can be disabled by the
 bootloader.
+
+### Printed Circuit Board
+
+PCB was designed on [KiCad](https://kicad-pcb.org/), which is a free
+PCB development environment on works also on Linux.
+It works well, I really like to use it. I was so satisfied, I have donated the
+project through [Linux Foundation.](https://www.linuxfoundation.org/).
+I have exported schematic in PDF for those who do not have KiCad installed.
+[Here is schematic](https://github.com/butyi/sci2can/raw/master/hw/sci2can_sch.pdf).
+
+Designed PCB is a small board with size 31x32 mm.
+Here are some pictures about the board design in KiCad.
+
+![pcbd1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbd1.png)
+
+![pcbd2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbd2.png)
+
+![pcbd3](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbd3.png)
+
+![pcbw1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbw1.png)
+
+![pcbw2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbw2.png)
+
+![pcbw3](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbw3.png)
+
+![pcbw4](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbw4.png)
+
+![pcbw5](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbw5.png)
+
+![pcbw6](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbw6.png)
+
+PCBs were produced by [SOS PCB Kft.](https://nyakexpressz.hu/). I am satisfied
+with quality of production. Please note, I just have produced V1.00 revision
+board, but the KiCad files are already V1.01, where findings were fixed.
+
+![pcb1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcb1.jpg)
+
+![pcb2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcb2.jpg)
+
+Next pictures about mounting parts.
+
+![pcbm1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbm1.jpg)
+
+![pcbm2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbm2.jpg)
+
+![pcbm3](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbm3.jpg)
 
 ### Box
 
