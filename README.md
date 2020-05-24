@@ -420,6 +420,8 @@ board, but the KiCad files are already V1.01, where findings were fixed.
 ### Mounting
 
 It is proposed to mount first R and C components on the bottom side.
+I have mounted parts of circuit revision V1.01 to board V1.00 how I can.
+This is visible on the pictures.
 
 ![pcbm1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbm1.jpg)
 
