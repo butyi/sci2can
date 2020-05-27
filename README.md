@@ -301,9 +301,14 @@ R5 serial resistor is to protect zener against too high current.
 R4 is needed to decrease the current when input is connected to +30V.
 But this is too large for 5V level serial communication. It decreases the
 communication line voltage below 2.5V, which is too low, not enough for
-communication. This is why C7 is there. For DC this capacitor is line it is not
-there. But on high frequency (baud rate) its reactance is about 1kOhm, which
-still OK for communication.
+communication. This is why C7 is there. For DC this capacitor is infinity ohm.
+But on high frequency (baud rate) its reactance is about 1kOhm, which
+still OK for the communication. When pin is connected to >24V, while C7 is not
+charged, extra current will flow, but this is limited by R4, and limited
+currect for charge time will not overload D5 zener. Of course connection -
+disconnection to 24V with high frequency can damage D5, but this is
+not expected, not a real use case.
+
 Here is a screenshot about shape of SCI signal on the uC pin (RxD1).
 
 ![sci_bits](https://github.com/butyi/sci2can/raw/master/pics/sci_bits.png)
@@ -311,7 +316,7 @@ Here is a screenshot about shape of SCI signal on the uC pin (RxD1).
 ### CAN output
 
 CAN uses PCA82C251 transceiver (U2). Since there will be point-point connection
-on this CAN and other side usually do does not have terminator resistor,
+on this CAN and other side usually does not have terminator resistor,
 there is built in CAN line terminator resistor (RT1) with 120 Ohm.
 CAN hardware supports high baud rates up to 1MBaud, but does not support CANFD. 
 
@@ -471,7 +476,7 @@ Left side there is russian microscope, right is also russian soldering iron.
 
 This is free. You can do anything you want with it.
 While I am using Linux, I got so many support from free projects,
-I am happy if I can give something for the community.
+I am happy if I can give something back to the community.
 
 ## Notes
 
