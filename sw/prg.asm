@@ -55,27 +55,54 @@ sci_buffer      ds      BUFFLEN ; Data buffer
 #ROM
 
 start:
+
         sei                     ; disable interrupts
 
         ldhx    #XRAM_END       ; H:X points to SP
         txs                     ; Init SP
 
-        clra                    ; Clear A
-        sta     SOPT1           ; Disable COP
-
+        bsr     COP_Init
         bsr     PTX_Init        ; I/O ports initialization
         bsr     MCG_Init
         bsr     RTC_Init
         jsr     CAN_Init
         jsr     SCI_Init
-        
+
         cli                     ; Enable interrupts
 
 main
+        bsr     KickCop
         bra     main
 
 
 ; ===================== SUB-ROUTINES ===========================================
+
+; ------------------------------------------------------------------------------
+; Computer Operating Properly (COP) Watchdog
+COP_Init
+        ; COPCLKS = 0 (1kHz)
+        ; COPW = 0 (No COP Window)
+        ; ADHTS = 0 (ADC Hardware Trigger from RTC overflow)
+        ; MCSEL = 0 (MCLK output on PTA0 is disabled)
+        ; -> So, no change needed for SOPT2
+
+        ; COPT = 01b (2^5 cycles, 1kHz) ~= 32ms
+        ; STOPE = 0 (Stop mode disabled)
+        ; SCI2PS = 0 (TxD2 on PTF0, RxD2 on PTF1.)
+        ; IICPS = 0 (SCL on PTF2, SDA on PTF3)
+        lda     #COPT0_
+        sta     SOPT1
+        rts
+
+        ; Refresh Watchdog
+KickCop
+        psha                    ; Save A, because function will change it
+        lda       #$55          ; First pattern $55
+        sta       COP
+        coma                    ; Second pattern $AA
+        sta       COP
+        pula                    ; Restore original content of A
+        rts
 
 ; ------------------------------------------------------------------------------
 ; Parallel Input/Output Control
