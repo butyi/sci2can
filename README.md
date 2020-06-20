@@ -228,15 +228,14 @@ specific PCB.
 
 - At least the following connector pins are needed for gateway function:
   - Ground
-  - Power supply ( +7V ... +30V )
+  - Power supply ( +7V ... +38V )
   - Serial data input line
   - CAN Low
   - CAN High
 - Supply power input must support both 12V and 24V systems.
 - Supply power reverse polarity protection needed.
-- Supply power LED on internal 5V.
 - SCI does not need MAX232 driver because there isn't in the transmitter too.
-- SCI port must be protected against connect to supply (+30V).
+- SCI port must be protected against connect to supply (+38V).
 - CAN transceiver is needed.
 - CAN Built in terminator resistor is needed.
 - Status LED needed with software control.
@@ -260,6 +259,7 @@ External Crystal is used for better CAN performances, this is proposed
 by uC manufacturer. Passive parts around are also according to datasheet and
 similar to development board circuit.
 4MHz is enough up to CAN baud rate 500k. For 1Mbaud 8MHz Crystal is needed.
+Crystal is now pin type, since via is need anyway, now the pins holes are vias.
 
 ### Connector
 
@@ -273,15 +273,13 @@ into the holes. It saves some money and height.
 ### Power supply
 
 Power input starts with D1 diode for reverse polarity protection.
-7805 was designed but of course the switching step-down replacement to be
-used. That is high efficiency in same size and same pinout.
+A 7805 replacement circuit was designed on the main board.
 Search "7805 replacement switching regulator" on Internet.
-Unfortunatey what I have damaged on 25V input. Therefore I needed to use a bit
-bigger one. This contains MP1584, with maximal input voltage 30V. But my plan
-is to use MP4560 instead, which can be used up to 55V or MAX5035 up to 76V.
-There are some filter capacitors around. Once is at the microcontroller.
-Finally there is the optional power LED (D2). It shows power on state, when
-+5V is available.
+It uses ME3116. 1A output, max input voltage is 40V. I just
+recognized, overvoltage protector diode is needed on the input. I have choosen
+SMAJ33A. Without this protection the supply could damaged at 24V due to switch
+on sparks. I use ElCo capacitor on input.
+There are also some filter capacitors around. Once is at the microcontroller.
 
 ### BDM port
 
@@ -297,21 +295,28 @@ SCI input is connected to RX pin of SCI1 module. There are serial resistors
 for protection against its connection to 24V.
 There is 500mW zener diode (D5) against higher than 5V conected to uC pin.
 Especially because PTE port has no built in clamp diode to 5V.
-R5 serial resistor is to protect zener against too high current.
-R4 is needed to decrease the current when input is connected to +30V.
-But this is too large for 5V level serial communication. It decreases the
-communication line voltage below 2.5V, which is too low, not enough for
-communication. This is why C7 is there. For DC this capacitor is infinity ohm.
+
+Ri2 serial resistor is to protect zener against too high current when input is
+connected to +30V. Ri3 is needed to decrease the current from 5V to 3.3V.
+
+But these resistors together are too large for 5V level serial communication. 
+It decreases the communication line voltage below 2.5V, which is too low,
+not enough for proper communication. As help there is Ci2. 
+For DC this capacitor is infinity ohm. 
 But on high frequency (baud rate) its reactance is about 1kOhm, which
-still OK for the communication. When pin is connected to >24V, while C7 is not
-charged, extra current will flow, but this is limited by R4, and limited
-currect for charge time will not overload D5 zener. Of course connection -
-disconnection to 24V with high frequency can damage D5, but this is
-not expected, not a real use case.
+still good for the communication. When pin is connected to >24V, zener can
+dissipate the energy of charged Ci2. Of course connection -
+disconnection to 24V with high frequency can damage the zener, but this is
+not a real use case.
 
 Here is a screenshot about shape of SCI signal on the uC pin (RxD1).
 
 ![sci_bits](https://github.com/butyi/sci2can/raw/master/pics/sci_bits.png)
+
+Since the SCI signal voltage is just 4Vpp, sometimes it is not
+enough, and deceived data is false with 5V supply. 
+To prevent it, I changed the supply from 5V to 3.3V. 
+With this modification, signal level and received data was proper.
 
 ### CAN output
 
@@ -332,6 +337,13 @@ visible outside while it is still dust resistant.
 
 ![box3](https://github.com/butyi/sci2can/raw/master/pics/sci2can_box3.jpg)
 
+### Passive components
+
+To limit number of different parts, I have tried to use 100ohm, 1k, 10k, 100k,
+1M resistors and 10nF, 100nF, 1uF, 10uF capacitors as many places as possible.
+I have could buy these parts by 1€/5000pcs. To store it, the cheapest solution
+is to buy empty creme holder box in the pharmacy. :smile:
+
 ### Additional features
 
 Board was designed to be usable for other purposes as well, as much as the
@@ -344,23 +356,23 @@ be mounted for simple gateway function.
 #### Input
 
 SCI input is also connected to PTA0. It allows to be used as analogue input.
-In this case R6 was designed to be used as low side of a voltage divider.
-If filter is needed, filter capacitor can be soldered on the top of R7 or D5.
+In this case Ri4,9 was designed to be used as low side of a voltage divider.
+If filter is needed, filter capacitor can be soldered on the top of Ri4 or the
+zener.
 
 #### Output
 
-Hardware has a low side FET output (Q2). This can switch some external load,
-like lamp, buzzer, relay, or similar. It has also a LED (D4) to be visible if
-FET is switched on or off.
+Hardware has two low side FET outputs. These can switch some external load,
+like lamp, buzzer, relay, or similar.
 Gate is pulled down to close FET while port is not yet controlled.
-FET was intentionally connected to PTD2, because this pin is timer output port.
-This makes output pulse and PWM capable.
+FET was intentionally connected to PTD2,3, because these pins are timer output
+ports. These make outputs pulse and PWM capable.
 
-OUT port can also be used as input if FET is not mounted but instead a suitable
-resistor is mounted between source and gate pins of FET. In this case this
-resistor together with R13 is a voltage divider. Filter capacitor (if needed)
-can be soldered on the top of R13.
-Since FET is connected to timer port, this way timer can be used for
+OUT ports can also be used as timer input if FET is not mounted but instead a
+suitable resistor is mounted between source and gate pins of FET. In this case
+this resistor together with gate pull down resistor are a voltage divider.
+Filter capacitor (if needed) can be soldered on the top of pull down resistor.
+Since FETs are connected to timer ports, this way timer can be used for
 pulse length measurement, frequency measurement or similar.
 
 #### Supply measurement
@@ -372,13 +384,10 @@ be measured by the software and used for any purpose.
 
 #### BDM extra pins
 
-Originally pin 3 and 5 are not used on BDM port. I am planning to develop
-bootloader for this controller too for faster and easier software download.
-Therefore I have connected Rx and Tx pins of second SCI module (SCI2) to
-these two not used BDM pins.
-I know that these ports are same with CAN Rx and Tx ports on 32pins package,
-but the bootloader will not use CAN and transceiver can be disabled by the
-bootloader.
+I have extended the debugger connector by 4 additional pins. These are now
+the IIC/SPI pins as preparation to connect some IIC or SPI display to board.
+E.g. a small 0.96 col OLED IIC display. In port operation we can call these pins
+as an extension interface.
 
 ### Printed Circuit Board
 
@@ -391,7 +400,7 @@ project through [Linux Foundation.](https://www.linuxfoundation.org/).
 I have exported schematic in PDF for those who do not have KiCad installed.
 [Here is schematic](https://github.com/butyi/sci2can/raw/master/hw/sci2can_sch.pdf).
 
-Designed PCB is a small board with size 31x32 mm.
+Designed PCB is a small board with size 30x30 mm to fit into mentioned box.
 Here are some pictures about the board design in KiCad.
 
 ![pcbd1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbd1.png)
@@ -414,9 +423,11 @@ Here are some pictures about the board design in KiCad.
 
 #### Production
 
-PCBs were produced by [SOS PCB Kft.](https://nyakexpressz.hu/). I am satisfied
-with quality of production. Please note, I just have produced V1.00 revision
-board, but the KiCad files are already V1.01, where findings were fixed.
+I have tried to order PCB from China with SMD mounting. Experiences are comming
+soon.
+
+A-sample PCBs (V1.00) were produced by [SOS PCB Kft.](https://nyakexpressz.hu/).
+I was satisfied with quality of production. 
 
 ![pcb1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcb1.jpg)
 
@@ -435,6 +446,9 @@ designed power supply board is not so professional but sufficient for country.
 :smile:
 
 ![pcbm2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbm2.jpg)
+
+Note, take care to low resistance of solder paste. Use as less as possible,
+and always remove remainings by water.
 
 ### Box
 
@@ -463,40 +477,6 @@ Simple, cheap, small. Perfect.
 Most of them are from [ebay](https://www.ebay.com/).
 All together 10€ a product without human costs (development, assembly) and
 without profit.
-
-### Revisions
-
-#### V1.01
-
-Was just middle step to V1.02. It was not produced. To be honest, I forgot to
-commit.
-
-#### V1.02
-
-The power supply is designed on the main board. It has same circuit as the
-7805 replacement. It uses ME3116. 1A output, max input voltage is 40V. I just
-recognized, overvoltage protector diode is needed on the input. I have choosen
-SMAJ33A. Without this protection the supply could damaged at 24V due to switch
-on sparks. I use ElCo capacitor on input.
-
-Since the SCI signal voltage is just 4Vpp, sometimes it was not
-enough, and deceived data was false. To prevent it, I changed the supply from
-5V to 3.3V. With this modification, signal level and received data was proper.
-
-I have changed both IN and OUT ports. Now both are capable to be input or
-output. All of these components can be mounted, with input circuit the output
-can be monitored.
-
-I have removed the power supply LED. It was not needed, can be covered by
-status LED.
-
-I have extended the debugger connector by 4 additional pins. These are now
-the IIC/SPI pins as preparation to connect small 0.96 col OLED IIC display.
-
-To limit number of different parts, I have tried to use 100ohm, 1k, 10k, 100k,
-1M resistors and 10nF, 100nF, 1uF, 10uF capacitors as many places as possible.
-I have could buy these parts by 1€/5000pcs. To store it, the cheapest solution
-is to buy empty creme holder box in the pharmacy. :smile:
 
 ## Workshop
 
