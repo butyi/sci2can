@@ -234,6 +234,7 @@ specific PCB.
   - CAN High
 - Supply power input must support both 12V and 24V systems.
 - Supply power reverse polarity protection needed.
+- Small power supply dissipation.
 - SCI does not need MAX232 driver because there isn't in the transmitter too.
 - SCI port must be protected against connect to supply (+38V).
 - CAN transceiver is needed.
@@ -300,8 +301,8 @@ Ri2 serial resistor is to protect zener against too high current when input is
 connected to +30V. Ri3 is needed to decrease the current from 5V to 3.3V.
 
 But these resistors together are too large for 5V level serial communication. 
-It decreases the communication line voltage below 2.5V, which is too low,
-not enough for proper communication. As help there is Ci2. 
+It decreases the communication line voltage below 3.5V, which is too low,
+not enough for proper communication. As a help there is Ci2. 
 For DC this capacitor is infinity ohm. 
 But on high frequency (baud rate) its reactance is about 1kOhm, which
 still good for the communication. When pin is connected to >24V, zener can
@@ -353,20 +354,22 @@ but I hope these will be useful for other functions in the future with the same
 board. These components are marked by * on the schematic. These are not need to
 be mounted for simple gateway function.
 
-#### Input
+#### Inputs
 
 SCI input is also connected to PTA0. It allows to be used as analogue input.
-In this case Ri4,9 was designed to be used as low side of a voltage divider.
+In this case Ri4 was designed to be used as low side of a voltage divider.
 If filter is needed, filter capacitor can be soldered on the top of Ri4 or the
 zener.
+Similar circuit is also available on the other IO pin without pull down resisor.
+When IO pins is used as output, input circuit can be used to monitor the output.
 
-#### Output
+#### Outputs
 
-Hardware has two low side FET outputs. These can switch some external load,
+Hardware has two low side FET outputs. These can switch some external loads,
 like lamp, buzzer, relay, or similar.
 Gate is pulled down to close FET while port is not yet controlled.
-FET was intentionally connected to PTD2,3, because these pins are timer output
-ports. These make outputs pulse and PWM capable.
+FET was intentionally connected to timer output pins, because this makes outputs
+pulse and PWM capable.
 
 OUT ports can also be used as timer input if FET is not mounted but instead a
 suitable resistor is mounted between source and gate pins of FET. In this case
