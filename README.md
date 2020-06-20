@@ -273,14 +273,16 @@ into the holes. It saves some money and height.
 
 ### Power supply
 
-Power input starts with D1 diode for reverse polarity protection.
-A 7805 replacement circuit was designed on the main board.
+Power input starts with Ds1 diode for reverse polarity protection.
+Same circuit as 7805 replacement was designed on the main board.
 Search "7805 replacement switching regulator" on Internet.
-It uses ME3116. 1A output, max input voltage is 40V. I just
-recognized, overvoltage protector diode is needed on the input. I have choosen
-SMAJ33A. Without this protection the supply could damaged at 24V due to switch
-on sparks. I use ElCo capacitor on input.
-There are also some filter capacitors around. Once is at the microcontroller.
+It uses ME3116. 1A output, max input voltage is 40V.
+I just recognized, transient suppression diode is needed on the input. 
+Without this protection the supply could damaged at 24V due sparks during 
+switch on. I have choosen SMAJ33A.
+There is electrolit capacitor on input voltage.
+There are also some filter capacitors on uC supply. 
+Once is very close to the microcontroller.
 
 ### BDM port
 
@@ -294,8 +296,8 @@ This is only needded for software update.
 
 SCI input is connected to RX pin of SCI1 module. There are serial resistors
 for protection against its connection to 24V.
-There is 500mW zener diode (D5) against higher than 5V conected to uC pin.
-Especially because PTE port has no built in clamp diode to 5V.
+There is 500mW zener diode against higher than 5V conected to uC pin.
+Especially because PTE port has no built in clamp diode to supply.
 
 Ri2 serial resistor is to protect zener against too high current when input is
 connected to +30V. Ri3 is needed to decrease the current from 5V to 3.3V.
