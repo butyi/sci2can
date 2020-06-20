@@ -464,7 +464,38 @@ Most of them are from [ebay](https://www.ebay.com/).
 All together 10€ a product without human costs (development, assembly) and
 without profit.
 
-### Workshop
+### Revisions
+
+#### V1.01
+
+Was just middle step to V1.02. It was not produced. To be honest, I forgot to
+commit.
+
+#### V1.02
+
+The power supply is designed on the main board. It has same circuit as the
+7805 replacement. It uses ME3116. 1A output, max input voltage is 40V. I just
+recognized, overvoltage protector diode is needed on the input. I have choosen
+SMAJ33A. Without this protection the supply could damaged at 24V due to switch
+on sparks. I use ElCo capacitor on input.
+
+Since the SCI signal voltage is just 4Vpp, sometimes it was not
+enough, and deceived data was false. To prevent it, I changed the supply from
+5V to 3.3V. With this modification, signal level and received data was proper.
+
+I have changed both IN and OUT ports. Now both are capable to be input or
+output. All of these components can be mounted, with input circuit the output
+can be monitored.
+
+I have removed the power supply LED. It was not needed, can be covered by
+status LED.
+
+To limit number of different parts, I have tried to use 100ohm, 1k, 10k, 100k,
+1M resistors and 10nF, 100nF, 1uF, 10uF capacitors as many places as possible.
+I have could buy these parts by 1€/5000pcs. To store it, the cheapest solution
+is to buy empty creme holder box in the pharmacy. :smile:
+
+## Workshop
 
 Finally here is a picture about my workshop corner. :smile:
 
