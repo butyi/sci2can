@@ -490,6 +490,9 @@ can be monitored.
 I have removed the power supply LED. It was not needed, can be covered by
 status LED.
 
+I have extended the debugger connector by 4 additional pins. These are now
+the IIC/SPI pins as preparation to connect small 0.96 col OLED IIC display.
+
 To limit number of different parts, I have tried to use 100ohm, 1k, 10k, 100k,
 1M resistors and 10nF, 100nF, 1uF, 10uF capacitors as many places as possible.
 I have could buy these parts by 1€/5000pcs. To store it, the cheapest solution
