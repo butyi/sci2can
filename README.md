@@ -321,9 +321,15 @@ With this modification, signal level and received data was proper.
 
 ### CAN output
 
-CAN uses PCA82C251 transceiver (U2). Since there will be point-point connection
+CAN uses PCA82C251 transceiver. Since there will be point-point connection
 on this CAN and other side usually does not have terminator resistor,
-there is built in CAN line terminator resistor (RT1) with 120 Ohm.
+there is built in CAN line terminator resistor (Rc2) with 100 Ohm.
+Why not 120ohm? Good question.
+To limit number of different parts, I have tried to use 100ohm, 1k, 10k, 100k,
+1M resistors and 10nF, 100nF, 1uF, 10uF capacitors as many places as possible.
+I could buy these parts by 1€/5000pcs. To store it, the cheapest solution
+is to buy empty creme holder box in the pharmacy. :smile:
+Turning back to CAN.
 CAN hardware supports high baud rates up to 1MBaud, but does not support CANFD. 
 
 ### Status LED
@@ -337,13 +343,6 @@ the box by glue gun. This glue is usually enough transparent to be LED light
 visible outside while it is still dust resistant.
 
 ![box3](https://github.com/butyi/sci2can/raw/master/pics/sci2can_box3.jpg)
-
-### Passive components
-
-To limit number of different parts, I have tried to use 100ohm, 1k, 10k, 100k,
-1M resistors and 10nF, 100nF, 1uF, 10uF capacitors as many places as possible.
-I have could buy these parts by 1€/5000pcs. To store it, the cheapest solution
-is to buy empty creme holder box in the pharmacy. :smile:
 
 ### Additional features
 
