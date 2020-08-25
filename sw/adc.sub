@@ -1,0 +1,23 @@
+; ===================== SUB-ROUTINES ===========================================
+#ROM
+
+; ADC module initialization
+ADC_Init        
+        bset    PIN5.,APCTL1    ; Set PTA5 as analogue input (not I/O port)
+        ; ADLPC = 0 (High speed config)
+        ; ADIV = 11b (input clock / 8)
+        ; ADLSMP = 1 (Long sample time) maybe filter out noise pulses
+        ; MODE = 00b (8 bit mode)
+        ; ADICLK = 01b (Bus clock divided by 2)
+        mov     #ADIV0_|ADIV1_|ADLSMP_|ADICLK0_,ADCCFG
+        rts
+        
+; Read ADC value non-interrupt way. X select the channel to be read.  
+ADC_read        
+        stx     ADCSC1
+ADC_read_loop
+        jsr     KickCop
+        brclr   COCO.,ADCSC1,ADC_read_loop
+        rts                     ; Ready, value is on ADCRL
+
+

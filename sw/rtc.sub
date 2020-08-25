@@ -1,0 +1,112 @@
+; ====================  VARIABLES  =============================================
+#RAM
+
+led_timer       ds      1       ; Timer for flash status LED
+
+led_flags       ds      1       ; Flag bits for flash status LED
+                @bitnum POWERED_LED,0
+                @bitnum SCIBYTE_LED,1
+                @bitnum SCIPACK_LED,2
+                @bitnum CANSENT_LED,3
+                @bitnum POWERED_REQ,4
+                @bitnum SCIBYTE_REQ,5
+                @bitnum SCIPACK_REQ,6
+                @bitnum CANSENT_REQ,7
+
+timeevents      ds      1       ; Time related cyclic event bits 
+                @bitnum EVERY1SEC,7
+
+; ===================== Sub-Routines ==========================================
+#ROM
+
+; ------------------------------------------------------------------------------
+; Real-Time Counter (S08RTCV1)
+; This is periodic timer. (Like PIT in AZ60, TBM in GZ60 in the past) 
+;  - Select external clock (RTCLKS = 1)
+;  - Use interrupt to handle software timer variables (RTIE = 1)
+;  - RTCPS = 11 (10^4 means 4MHz/10000 = 400Hz)
+;  - RTCMOD = 100 (400Hz/100 = 4Hz -> 250ms)
+; This will result 250ms periodic interrupt.
+RTC_Init
+        ; Set up registers
+        mov     #RTIE_|RTCLKS0_|11,RTCSC
+        mov     #100,RTCMOD
+
+        mov     #$80,led_timer          ; Init timer (force 1s event first)
+        mov     #POWERED_REQ_,led_flags ; Init request nibble
+        clr     timeevents
+        
+        rts
+
+; RTC periodic interrupt service routine, hits in every 250ms
+; This is used only to flash status LED.
+; There are 4 status bits. Each notifies an event of sequence in the below order.
+; - POWERED: always set. (#$1)
+; - SCIBYTE: At least one byte was received from SCI (#$2)
+; - SCIPACK: Complete burst was received from SCI (#$4)
+; - CANSENT: All CAN messages of burst were sent on CAN (#$8)
+; At every 1s, the high nibble will be copied to low nibble.
+; Low nibble bits are saved value, this will be shown on LED.
+; High nibble bits are request bits. These are set by SCI and CAN IT routines
+; during execution in sequence. If a prevoius event did not happen, next events
+; will not happen. This means, bits (events) can only be set in the order.
+; Therefore only the following values are possible:
+; - #$1: Only POWERED, no byte was received from SCI. (LED flash: ___X)
+; - #$3: Some bytes were received from SCI. (LED flash: __XX)
+; - #$7: All bytes of burst were received from CAN. (LED flash: _XXX)
+; - #$F: All bytes were transmitted on CAN successfully. (LED flash: XXXX)
+; Below 250ms task will go through on these bits in the above order and set LED
+; On if the current bit is set. So, the following error codes are visible on LED.
+; - ___X, Short 25% flash: There is no SCI communication.
+;   Check cable, check if serial data is available in line, check baud rate 
+; - __XX, Medium 50% flash: SCI burst is short, received bytes are not enough.
+;   Check if proper ECU, proper system is connected to SCI 
+; - _XXX, Long 75% flash: SCI is OK, but data cannot be sent to CAN.
+;   Check CAN lines (Low and High), Check CAN baud rate  
+; - XXXX, Always On: Everything are OK, data is gatewayed to CAN properly.
+RTC_IT
+        bset    RTIF.,RTCSC     ; Clear flag
+#ifdef OSCILL_SUPP
+        bset    OSC_RTCIT.,OSC_RTCIT ; Set debug measure pin
+#endif
+        ; Handle Status LED
+        inc     led_timer
+        lda     led_timer
+        and     #3              ; check only 2 LSB bits
+        tax
+        bne     RTC_IT_no1sec
+        ; Move 4bits request to 4bits execute and reinit 4bits request 
+        lda     led_flags
+        nsa                     ; Move high nibble to low 
+        and     #$0F            ; Keep only low nibble
+        ora     #POWERED_REQ_   ; Set Powered bit in high nibble 
+        sta     led_flags
+        bset    EVERY1SEC.,timeevents
+RTC_IT_no1sec
+
+        incx
+        clra
+        sec
+RTC_IT_2                        ; A = 1<<X
+        rola
+        dbnzx   RTC_IT_2
+        and     led_flags       ; See masked bit of led_flags 
+        bne     RTC_IT_LED_On
+        bclr    LED2.,LED2      ; Switch LED Off
+        bra     RTC_IT_end
+RTC_IT_LED_On        
+        bset    LED2.,LED2      ; Switch LED On
+RTC_IT_end
+#ifdef OSCILL_SUPP
+        bclr    OSC_RTCIT.,OSC_RTCIT ; Clear debug measure pin
+#endif
+        rti
+        
+
+; ===================== IT VECTORS ==========================================
+#VECTORS
+
+        org     Vrtc
+        dw      RTC_IT
+
+

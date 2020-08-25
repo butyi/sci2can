@@ -390,8 +390,7 @@ be measured by the software and used for any purpose.
 
 I have extended the debugger connector by 4 additional pins. These are now
 the IIC/SPI pins as preparation to connect some IIC or SPI display to board.
-E.g. a small 0.96 col OLED IIC display. In port operation we can call these pins
-as an extension interface.
+I use it now for a small 0.96 col OLED IIC display.
 
 ### Printed Circuit Board
 
@@ -427,9 +426,6 @@ Here are some pictures about the board design in KiCad.
 
 #### Production
 
-I have tried to order PCB from China with SMD mounting. Experiences are comming
-soon.
-
 A-sample PCBs (V1.00) were produced by [SOS PCB Kft.](https://nyakexpressz.hu/).
 I was satisfied with quality of production. 
 
@@ -437,26 +433,26 @@ I was satisfied with quality of production.
 
 ![pcb2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcb2.jpg)
 
+I have ordered second generation PCB from China with SMD mounting.
+Result is sufficient.
+
+![pcb1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcb3.jpg)
+
+![pcb2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcb4.jpg)
+
 ### Mounting
 
-It is proposed to mount first R and C components on the bottom side.
-I have mounted parts of circuit revision V1.01 to board V1.00 how I can.
-This is visible on the pictures.
+R and C components on the bottom side were mounted by PCB producer.
+I have to mount only the up side components by hand.
 
 ![pcbm1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbm1.jpg)
-
-Next is the larger parts on top side. Can be visible here mounting of not
-designed power supply board is not so professional but sufficient for country.
-:smile:
-
-![pcbm2](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbm2.jpg)
 
 Note, take care to low resistance of solder paste. Use as less as possible,
 and always remove remainings by water.
 
 ### Box
 
-Here are pictures about prototype.
+Here are pictures about V1.00 prototype.
 
 ![box1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_box1.jpg)
 
@@ -467,6 +463,14 @@ I have ordered this box for null-series:
 ![box](https://github.com/butyi/sci2can/raw/master/pics/box.png)
 
 Simple, cheap, small. Perfect.
+
+Here are pictures about V1.02. This series has a 0.96 inch OLED 128x64 pixels
+display and two capacitive touch buttons. Suppressor diodes are still mounted
+into IO ports, because these were not yet designed on the board.
+
+![box4](https://github.com/butyi/sci2can/raw/master/pics/sci2can_box4.jpg)
+
+![box5](https://github.com/butyi/sci2can/raw/master/pics/sci2can_box5.jpg)
 
 ### Costs
 
@@ -507,6 +511,5 @@ Motorola, Freescale, NXP, MC68HC9S08DZ60, 68HC9S08DZ60, HC9S08DZ60, MC9S08DZ60,
 9S08DZ60, HC9S08DZ48, HC9S08DZ32, HC9S08DZ, 9S08DZ, UART, RS232.
 
 ###### 2020 Janos BENCSIK
-
 
 

@@ -1,0 +1,125 @@
+; =============================================================================
+; 0.96" OLED display with SSD1780 driver IC 
+; =============================================================================
+#include "fonttab.inc"
+
+#XRAM
+DISP_buff       ds      10
+
+; ===================== Sub-Routines ==========================================
+#ROM
+ssd1780_beg
+; ------------------------------------------------------------------------------
+; Initialize display
+DISP_init
+        mov     #$78,IICA       ; Device byte of slave IC (Addr=100b)
+        ldhx    #DISP_init_al   ; Load address of action list
+        jsr     IIC_ec          ; Execute action list
+        jsr     IIC_wfe         ; Wait for end of action list
+        rts        
+
+
+; Set display memory pointer to defined character position
+;  Position is in A. Low nibble: Column (0-15), High nobble: Row (0-7)
+DISP_pos
+        psha
+        lda     #$07    ; Write, 7 bytes
+        sta     DISP_buff     
+        clra            ; Co=0 (continuous), D/C#=0 (next bytes are commands)
+        sta     DISP_buff+1     
+        lda     #$21    ; Set Column Address (x)
+        sta     DISP_buff+2
+        lda     1,sp    ; X pos calculation
+        and     #$0F    ; Mask column number
+        lsla
+        lsla
+        lsla            ; *8 to convert character pos to pixel pos
+        sta     DISP_buff+3     
+        lda     #$7F    ; end X pos (end of line)
+        sta     DISP_buff+4     
+        lda     #$22    ; Set Page Address (y)
+        sta     DISP_buff+5     
+        pula            ; Y pos calculation
+        and     #$70    ; Mask row number
+        nsa             ; /16 to convert character pos to pixel pos
+        sta     DISP_buff+6     
+        lda     #$07    ; end page
+        sta     DISP_buff+7
+        lda     #$00    ; end action list
+        sta     DISP_buff+8
+        pshh
+        pshx
+        ldhx    #DISP_buff
+        jsr     IIC_ec          ; Execute action list
+        jsr     IIC_wfe         ; Wait for end of action list
+        pulx
+        pulh
+        rts
+
+; Prints a text from the defined character position
+; Parameters: 
+;  Position in A. Low nibble: High nobble: Row (0-7), Column (0-15)
+;  String address in HX
+DISP_print
+        bsr     DISP_pos        ; Go to character position
+DISP_p_nc                       ; Convert string letters to actions (Next Char)
+        lda     ,x              ; load letter
+        beq     DISP_p_exit     ; Exit when end of string
+        pshh
+        pshx
+        and     #$7F            ; Mask only printable characters
+        ldx     #11
+        mul                     ; Now XA contains offset in fonttab
+        pshx                    ; Save offset high byte
+        add     #fonttab&255    ; Add low byte of address of fonttab 
+        tax                     ; Address low into X
+        pula                    ; Get offset high byte
+        adc     #fonttab/256    ; Add high byte of address of fonttab 
+        psha
+        pulh                    ; Address high into H
+        jsr     IIC_ec          ; Execute action list (print string)
+        jsr     IIC_wfe         ; Wait for end of action list
+        pulx
+        pulh
+        aix     #1              ; Point to next character
+        bra     DISP_p_nc
+DISP_p_exit
+        rts
+
+
+; ------------------------------------------------------------------------------
+; Initialize display action list. See SSD1306.pdf page 64 about details.
+DISP_init_al
+        db      $1A     ; Write, 27 bytes
+        db      $00     ; Co=0 (continuous), D/C#=0 (next bytes are commands)
+        db      $AE     ; Turn off oled panel
+        db      $00     ; Set low column address
+        db      $10     ; Set high column address
+        db      $20     ; Set Memory Addressing Mode
+        db      $00     ; Memory Addressing Mode = Horizontal Addressing Mode
+        db      $B0     ; Set Page Start Address for Page Addressing Mode (P0)
+        db      $A8     ; Set multiplex ratio(1 to 64)
+        db      $3F     ; Multiplex ratio = 64
+        db      $D3     ; Set display offset
+        db      $00     ; Not offset
+        db      $40     ; Set display start line 0
+        db      $A1     ; Column address 0 is mapped to SEG N-1
+        db      $C8     ; Scan direction: Remapped (to be connector at top)
+        db      $DA     ; Set com pins hardware configuration
+        db      $12     ; Alternative COM pin config, Disable COM L/R remap
+        db      $81     ; Set contrast control register
+        db      $7F     ; Contrast value
+        db      $A4     ; Disable Entire Display On
+        db      $A6     ; Set non-inverse display
+        db      $D5     ; Set display clock divide ratio/oscillator frequency
+        db      $80     ; The ratio
+        db      $8D     ; Set Charge Pump enable/disable
+        db      $14     ; Set enable
+        db      $2E     ; Stop scroll
+        db      $AF     ; Turn on oled panel
+
+        db      $00     ; Final Stop (no more task to do)
+
+ssd1780_len     equ     $-ssd1780_beg
+
+

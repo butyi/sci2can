@@ -1,0 +1,226 @@
+; =============================================================================
+; IIC module for 9S08DZ60 microcontroller 
+; =============================================================================
+; Module only supports master operation. But both Tx and Rx.
+; Module shall be initialized by call of init function.
+; Communication is managed by interrupt service routine.
+; User must only define a so called "action list", which describes what to do.
+; Action list can be any in ROM or RAM, depends on the needs. When action
+; list is prepared, its address shall be load into HX register, device slave
+; address to be loaded into register IICA and call function to start execution
+; of actions.
+; When device slave address is written into IICA, LSB bit shall always be zero.
+;  This bit will handled automatic by the IIC engine according to action list. 
+; Action list consists of actions. Structure of an action is: 
+; - Command byte. 
+;   - Bit7 means direction. Read(1) or write(0).
+;   - Bit6-bit0 means number of data bytes of action.
+; If action is write, next bytes are data bytes to be sent. Number of bytes
+;  defined in command byte.
+; If action is read, next two bytes are RAM address where received data to be
+;  read. Please ensure to reserve enough long buffer for read data.
+; Zero command value has special meaning, that there is no more action.
+; Some examples:
+;  $01 $55 - write one byte data is $55
+;  $03 $55 $AA $CC - write three bytes, data are $55 $AA $CC
+;  $81 $00 $80 - read one byte into RAM address $0080
+;  $84 $01 $10 - read four bytes from RAM address $0110 ($0110-$0113)
+
+;
+;#include "dz60.inc"
+; ====================  VARIABLES  ============================================
+
+#RAM
+
+; IIC module variables
+IIC_dl          ds      1       ; Data lenght
+IIC_alp         ds      2       ; Action list pointer
+IIC_rbp         ds      2       ; Read buffer pointer
+
+; Variables of example
+;IIC_rb          ds      2       ; Read buffer
+
+; ====================  EQUATES ===============================================
+
+; Only for example
+;IIC_rba         equ     IIC_rb  ; This is just to be usable IIC_rb after dw
+
+; ====================  USING EXAMPLE  ========================================
+; Call init before enable global interrupt (cli) 
+;        jsr     IIC_Init
+; Do not forget to adjust speed for your device and cable length.
+
+; Load action list address into HX and call IIC Execute Command function
+;        mov     #$90,IICA               ; Device byte of slave IC
+;        ldhx    #IIC_cmds               ; Address of action list
+;        jsr     IIC_ec                  ; Start execution of command
+; The communication will be managed by interrupt, so result will be available
+; only later, not right after call of IIC_ec.
+
+; Action list for configuration of AD7416 temp sensor chip and read temperature
+; value from the sensor.
+;IIC_cmds
+;        db      $02     ; C: Write, 2 bytes (init config register)
+;        db      $01     ; D: Select Configuration register (address #1)
+;        db      $00     ; D: Write into register (all bits to be zero)
+;        db      $01     ; C: Write, 1 byte (Select register to read)
+;        db      $00     ; D: Select temperature value register (address #0)
+;        db      $82     ; C: Read, 2 bytes temperature value (mask $FFC0)
+;        dw      IIC_rba ; A: Read data into this variable
+;        db      $00     ; C: Final Stop (no more task to do)
+
+; ===================== Sub-Routines ==========================================
+#ROM
+IIC_beg
+; ------------------------------------------------------------------------------
+; IIC initalization and for waiting for call IIC_ec to start in Master mode
+IIC_Init
+        mov     #IICEN_,IICC            ; Switch ON IIC
+        mov     #MULT1_|$07,IICF        ; 8MHz / (4*40) ~= 50kHz
+        mov     #SRW_,IICS              ; R/W bit = 0
+        rts
+IIC_Slow
+        mov     #MULT1_|$1E,IICF        ; 8MHz / (4*192) ~= 10kHz
+        rts
+
+; ------------------------------------------------------------------------------
+; Execute Command. Parameter: address of action list in HX
+IIC_ec
+        mov     #IICEN_|IICIE_|MST_|TX_,IICC    ; Start in Master and Tx
+
+IIC_sfb                                 ; Send First Byte subfunction
+        lda     IICA                    ; Device select from IICA
+        tst     ,x                      ; Load dir+len byte from action list
+        bpl     IIC_sfb_w               ; Branch if write
+        ora     #1                      ; Set read bit for read
+IIC_sfb_w        
+        sta     IICD                    ; Initiate send of chip address
+
+        lda     ,x                      ; Load command byte
+        sta     IIC_dl                  ; Store command byte for interrupt 
+
+        aix     #1                      ; Point to next byte
+        sthx    IIC_alp                 ; Store pointer in action list
+
+        rts
+
+; ------------------------------------------------------------------------------
+; IIC Interrupt Service Routine
+;  See Figure 11-12 in datasheet. "Typical IIC Interrupt Routine"
+;  Length is 106us now, on 10kHz IIC it is 10%. On 1kHz 1%.
+IIC_IT
+        ;bset    PIN7.,PTD
+        bset    IICIF.,IICS             ; Clear the interrupt event flag
+        pshh                            ; Save H, because ISR will use it
+
+        brclr   ARBL.,IICS,IIC_IT_narb  ; Check if arbitration lost
+        bset    ARBL.,IICS              ; If yes, clear its flag
+        ;Here return status of action list is ARBITRATION LOST ERROR
+        bra     IIC_IT_ed               ; Stop action list execution
+IIC_IT_narb                             ; Not ARBitration error label
+        brclr   TX.,IICC,IIC_IT_rx      ; Jump to Rx path if TX bit is zero
+        ldhx    IIC_alp                 ; Address of next byte in action list
+        
+        ; Tx path
+        brclr   RXAK.,IICS,IIC_IT_rxackok       ; Check ACK by slave
+        ;Here return status of command list is NO ACK ERROR
+        bra     IIC_IT_ed               ; Stop action list execution
+IIC_IT_rxackok                          ; Rx ACK is OK label
+        
+        lda     IIC_dl                  ; Load command
+        bmi     IIC_IT_srx              ; Branch Rx bit (mask $80) is set
+        and     #$7F                    ; Mask len part only
+        beq     IIC_IT_nmd              ; Branch if len is zero (No More Data) 
+        dec     IIC_dl                  ; Decrease remaining length counter
+
+        lda     ,x                      ; Load next data to be sent
+        sta     IICD                    ; Send data byte
+        aix     #1                      ; Jump to next byte in action list 
+        sthx    IIC_alp                 ; Save pointer
+        
+        bra     IIC_IT_e                ; End of interrupt 
+
+        ; Switch to RX activities. (Left side of Figure 11-12.)
+IIC_IT_srx
+        bclr    7,IIC_dl                ; Clear Rx bit, not needed any more
+        bclr    6,IIC_dl                ; Clear Repeat bit, not needed in Rx
+        bclr    TX.,IICC                ; Switch IIC to Rx mode
+
+        ; Save address where bytes to be received 
+        lda     ,x                      ; Load high byte of RAM address 
+        sta     IIC_rbp                 ; and save where received data copied
+        aix     #1                      ; Jump to low buffer address byte 
+        lda     ,x                      ; Load low byte of RAM address
+        sta     IIC_rbp+1               ; and save where received data copied
+        aix     #1                      ; Jump to next command byte 
+        sthx    IIC_alp                 ; Save pointer
+        bsr     IIC_set_ack             ; Ensure do not ack last received byte
+
+        lda     IICD                    ; Dummy read to generate 8 bits clock
+        bra     IIC_IT_e                ; End of interrupt 
+
+IIC_IT_na                               ; Start next action
+        mov     #IICEN_|IICIE_|MST_|TX_|RSTA_,IICC ; Start in Master and Tx
+        bsr     IIC_sfb                 ; send first byte of package
+        bra     IIC_IT_e                ; End of interrupt
+        
+        ; Rx path
+IIC_IT_rx
+        dec     IIC_dl                  ; Decrease remaining length counter
+        tst     IIC_dl                  ; Test length counter
+        bne     IIC_IT_eor              ; Check if End Of Reception
+        bset    TX.,IICC                ; To prevent extra byte clock
+IIC_IT_eor
+        ldhx    IIC_rbp                 ; Load buffer address
+        lda     IICD                    ; Load received byte
+        sta     ,x                      ; Save received byte into address
+        aix     #1                      ; Point to next byte
+        sthx    IIC_rbp                 ; Save next buffer address
+
+        tst     IIC_dl                  ; Test length counter
+        beq     IIC_IT_nmd              ; Branch to No More Data
+        bsr     IIC_set_ack             ; Ensure do not ack last received byte
+        bra     IIC_IT_e                ; End of interrupt
+
+        ; No More Data
+IIC_IT_nmd                              
+        ldhx    IIC_alp                 ; Address of command of next action
+        lda     ,x                      ; Load next command
+        bne     IIC_IT_na               ; Branch to next action handling
+
+        ; End of interrupt
+IIC_IT_ed
+        mov     #IICEN_,IICC            ; Stop and Disable interrupt
+        ;Here return status of command list is OK
+IIC_IT_e                                ; End of interrupt
+        pulh                            ; Restore H
+        ;bclr    PIN7.,PTD
+        rti
+
+; IIC subrutine to disable sent ack of master for last received byte
+IIC_set_ack
+        lda     IIC_dl                  ; Check if last rx byte
+        cmp     #1
+        bne     IIC_sa_nl               ; Not the last
+        bset    TXAK.,IICC              ; Last, do not ack last byte
+IIC_sa_nl
+        rts
+
+; Wait for end of execution of action list 
+IIC_wfe
+        jsr     KickCop
+        brset   IICIE.,IICC,IIC_wfe
+        brset   BUSY.,IICS,IIC_wfe
+        rts        
+
+IIC_len         equ     $-IIC_beg
+        
+; ===================== IT VECTORS ==========================================
+#VECTORS
+
+        org     Viic
+        dw      IIC_IT
+
+
+
+

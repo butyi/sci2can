@@ -1,0 +1,173 @@
+; ====================  VARIABLES  =============================================
+#RAM
+
+can_ptr         ds      1       ; Pointer for read data from sci_buffer to CAN
+
+; ===================== SUB-ROUTINES ===========================================
+#ROM
+
+; ------------------------------------------------------------------------------
+; Freescale Controller Area Network (S08MSCANV1)
+; Set up CAN for 250 kbit/s using 4 MHz external clock
+; CAN will use in interrupt mode, but init does not enable interrupt.
+; It will be enabled when transmission can be started, so when
+; all bytes have been received from SCI.
+;
+;   Baud = fCANCLK / Prescaler / (1 + Tseg1 + Tseg2) = 
+;     4MHz / 2 / (1+5+2) = 250k 
+;   Sample point = 75% 
+;     (1 + Tseg1)/(1 + Tseg1 + Tseg2) = (1+5)/(1+5+2) = 0.75
+CAN_Init
+        ; MSCAN Enable
+        lda     #CAN_CANE_
+        sta     CANCTL1
+
+        ; Wait for Initialization Mode Acknowledge
+ican1
+        lda     CANCTL1
+        and     #CAN_INITAK_
+        beq     ican1
+
+        ; SJW = 1 Tq, Prescaler value (P) = 2
+        lda     #1
+        sta     CANBTR0
+        
+        ; One sample per bit, Tseg2 = 2, Tseg1 = 5
+        lda     #$14
+        sta     CANBTR1
+
+        ; Leave Initialization Mode
+        clra
+        sta     CANCTL0
+
+        ; Wait for exit Initialization Mode Acknowledge
+ican2
+        lda     CANCTL1
+        and     #CAN_INITAK_
+        bne     ican2
+
+        ; Send info message
+        
+        ; Select first buffer
+        lda     #1
+        sta     CANTBSEL
+
+        ; Set ID
+        lda     #$FF
+        sta     CANTIDR0
+        sta     CANTIDR1        ; Set IDE and SRR
+        sta     CANTIDR2
+        and     #$FE            ; Clear RTR bit
+        sta     CANTIDR3
+        
+        ; Set message data
+        lda     #APPLICATION
+        sta     CANTDSR0
+        lda     #SW_REV
+        sta     CANTDSR1
+        lda     #BUILD_DATE_YH
+        sta     CANTDSR2
+        lda     #BUILD_DATE_YL
+        sta     CANTDSR3
+        lda     #BUILD_DATE_MO
+        sta     CANTDSR4
+        lda     #BUILD_DATE_DA
+        sta     CANTDSR5
+        lda     #BUILD_DATE_HO
+        sta     CANTDSR6
+        lda     #BUILD_DATE_MI
+        sta     CANTDSR7
+
+        ; Set data length
+        lda     #8
+        sta     CANTDLR
+
+        ; Transmit the message
+        lda     CANTBSEL
+        sta     CANTFLG
+
+        rts
+
+
+; CAN Tx interrupt service routine. This will send automatic all 20 messages in
+; burst. When last message was transmitted, interrupt disables itself to stop
+; transmission.
+CAN_TX_IT
+#ifdef OSCILL_SUPP
+        bset    OSC_CANIT.,OSC_CANIT ; Set debug measure pin
+#endif        
+        ; Save H, because it will be used but not saved by CPU.
+        pshh
+        
+        ; Set index register
+        clrh
+        ldx     can_ptr
+        
+        ; Select first buffer
+        lda     #1
+        sta     CANTBSEL
+        
+        ; Set ID
+        stx     CANTIDR0        ; byte pointer is ID
+        clra
+        sta     CANTIDR1
+        sta     CANTIDR2
+        sta     CANTIDR3
+        
+        ; Set message data
+        lda     sci_buffer+0,x
+        sta     CANTDSR0
+        lda     sci_buffer+1,x
+        sta     CANTDSR1
+        lda     sci_buffer+2,x
+        sta     CANTDSR2
+        lda     sci_buffer+3,x
+        sta     CANTDSR3
+        lda     sci_buffer+4,x
+        sta     CANTDSR4
+        lda     sci_buffer+5,x
+        sta     CANTDSR5
+        lda     sci_buffer+6,x
+        sta     CANTDSR6
+        lda     sci_buffer+7,x
+        sta     CANTDSR7
+
+        ; Set data length
+        lda     #8
+        sta     CANTDLR
+
+        ; Transmit the message
+        lda     CANTBSEL
+        sta     CANTFLG
+        
+        ; Select next message
+        lda     can_ptr
+        add     #10
+        sta     can_ptr
+        ; Check if last message was sent
+        cmp     #BUFFLEN
+        blo     CAN_TX_IT_1
+        ; Disable interrupt to stop CAN transmission
+        lda     #0
+        sta     CANTIER
+        bset    CANSENT_REQ.,led_flags      ; Notify successfully sent CAN messages
+#ifdef OSCILL_SUPP
+        bclr    OSC_CANTX.,OSC_CANTX ; Clear debug measure pin
+#endif
+CAN_TX_IT_1
+        
+        ; Resore H before return from interrupt
+        pulh
+#ifdef OSCILL_SUPP
+        bclr    OSC_CANIT.,OSC_CANIT ; Clear debug measure pin
+#endif
+        rti
+
+
+; ===================== IT VECTORS =============================================
+#VECTORS
+        
+        org     Vcantx
+        dw      CAN_TX_IT
+        
+

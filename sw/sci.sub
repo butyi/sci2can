@@ -1,0 +1,89 @@
+; ====================  VARIABLES  =============================================
+#RAM
+
+sci_ptr         ds      1       ; Pointer for fill up sci_buffer from SCI
+
+#XRAM
+
+sci_buffer      ds      BUFFLEN+10 ; Data buffer with 10 extra bytes
+
+; ===================== SUB-ROUTINES ===========================================
+#ROM
+
+; ------------------------------------------------------------------------------
+; Serial Communications Interface (S08SCIV4)
+; Init SCI to receive serial data with baud rate 125k
+SCI_Init
+        clr     SCI1BDH
+        mov     #4,SCI1BDL      ; Baud (8MHz / 16 / 4 = 125k )
+        mov     #RE_|RIE_|ILIE_,SCI1C2 ; Rx enable with IT
+        clr     sci_ptr         ; Init buffer pointer of SCI
+        clr     can_ptr         ; Init buffer pointer of CAN
+        rts
+        
+; SCI RX interrupt service.
+; Two interrupts are used. RX and IDLE. RX interrupt is invoked when byte is
+; received. Byte is stored in sci_buffer. IDLE interrupt is invoked once when
+; bus line is idle for one byte long time after active communication. This is
+; used to detect end of bujrst data packet, to trigger CAN transmission.
+SCIRX_IT
+#ifdef OSCILL_SUPP
+        bset    OSC_SCIIT.,OSC_SCIIT ; Set debug measure pin
+#endif
+        pshh                    ; Save H, it will be used here
+        lda     SCI1S1          ; Clear RDRF by read the register
+        tax                     ; Save value of SCIxS1 for further check
+        and     #RDRF_          ; Check if byte reception happened 
+        bne     SCIRX_IT_char   ; If yes, jump to char handling
+        txa                     ; Check if saved SCIxS1 notifies
+        and     #IDLE_          ;  line idle event
+        bne     SCIRX_IT_idle   ; If yes, jump to complete frame handling
+        lda     SCI1D           ; Load data register is needed to clear flags
+        bra     SCIRX_IT_end
+
+SCIRX_IT_char
+        clrh                    ; H not needed for short pointer
+        ldx     sci_ptr         ; X = sci_ptr
+        cmp     #BUFFLEN        ; Check number of already received bytes
+        bhs     SCIRX_IT_much   ; Too much byte, not needed
+        lda     SCI1D           ; Load received byte
+        sta     sci_buffer,x    ; Store in sci_buffer[sci_ptr]
+        inc     sci_ptr         ; Next byte in sci_buffer
+SCIRX_IT_much
+        bset    SCIBYTE_REQ.,led_flags ; Notify received SCI byte
+#ifdef OSCILL_SUPP
+        bset    OSC_SCIRX.,OSC_SCIRX ; Set debug measure pin
+#endif
+        bra     SCIRX_IT_end
+
+SCIRX_IT_idle        
+        lda     SCI1D           ; Load data register, needed to clear IDLE
+        clr     can_ptr
+        lda     sci_ptr         ; Check if num of received bytes
+        cmp     #BUFFLEN        ;  are a complete pack
+        blo     SCIRX_IT_incomplete ; If not, skip CAN TX
+        bset    SCIPACK_REQ.,led_flags ; Notify received complete SCI burst
+#ifdef OSCILL_SUPP
+        bset    OSC_CANTX.,OSC_CANTX ; Set debug measure pin
+#endif
+        lda     #1              ; Enable TX_IT for first CAN Tx buffer
+        sta     CANTIER         ;  to start CAN transmission
+SCIRX_IT_incomplete        
+#ifdef OSCILL_SUPP
+        bclr    OSC_SCIRX.,OSC_SCIRX ; Clear debug measure pin
+#endif
+        clr     sci_ptr         ; First byte in sci_buffer
+SCIRX_IT_end        
+        pulh                    ; Restore H
+#ifdef OSCILL_SUPP
+        bclr    OSC_SCIIT.,OSC_SCIIT ; Set debug measure pin
+#endif
+        rti
+        
+; ===================== IT VECTORS =============================================
+#VECTORS
+
+        org     Vsci1rx
+        dw      SCIRX_IT
+
+
