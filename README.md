@@ -290,36 +290,26 @@ BDM port is like proposed in datasheet. This matches to USBDM developer
 interface which I use. Single pin communication line (BKGD) has external pull
 up resistor, even if it is not necessary.
 Reset pin has simple external pull up resistor and filter capacitor.
-This is only needded for software update.
+This port is only needded for software update.
+The connector contains 4 extra pins. Details are below.
 
 ### SCI input
 
 SCI input is connected to RX pin of SCI1 module. There are serial resistors
 for protection against its connection to 24V.
-There is 500mW zener diode against higher than 5V conected to uC pin.
+Next is Ui1 74HC1G125GW as impedance adapter. This provides much higher impedance
+input than uC pin.
+There is Di2 BZT52C4V7 transient suppressor diode to save further parts of
+circuit against high voltage tranzients. 
 Especially because PTE port has no built in clamp diode to supply.
 
-Ri2 serial resistor is to protect zener against too high current when input is
-connected to +30V. Ri3 is needed to decrease the current from 5V to 3.3V.
+When Ui1 is mounted, Ri3 and Ri4 are not needed.
+Ri3 and Ri4 are designed when pin is used for normal digit or analogue input. 
 
-But these resistors together are too large for 5V level serial communication. 
-It decreases the communication line voltage below 3.5V, which is too low,
-not enough for proper communication. As a help there is Ci2. 
-For DC this capacitor is infinity ohm. 
-But on high frequency (baud rate) its reactance is about 1kOhm, which
-still good for the communication. When pin is connected to >24V, zener can
-dissipate the energy of charged Ci2. Of course connection -
-disconnection to 24V with high frequency can damage the zener, but this is
-not a real use case.
-
+Ui1 provides perfect shape and amplitude signal for uC input pin.
 Here is a screenshot about shape of SCI signal on the uC pin (RxD1).
 
 ![sci_bits](https://github.com/butyi/sci2can/raw/master/pics/sci_bits.png)
-
-Since the SCI signal voltage is just 4Vpp, sometimes it is not
-enough, and deceived data is false with 5V supply. 
-To prevent it, I changed the supply from 5V to 3.3V. 
-With this modification, signal level and received data was proper.
 
 ### CAN output
 
@@ -444,8 +434,6 @@ Result is sufficient.
 
 R and C components on the bottom side were mounted by PCB producer.
 I have to mount only the up side components by hand.
-
-![pcbm1](https://github.com/butyi/sci2can/raw/master/pics/sci2can_pcbm1.jpg)
 
 Note, take care to low resistance of solder paste. Use as less as possible,
 and always remove remainings by water.
