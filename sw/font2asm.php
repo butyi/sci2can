@@ -1,12 +1,12 @@
 <?php
 
-// Visual format of character table. 
+// Visual format of character table.
 // Can be edited before generate assembly commands for SSD1780 display by visual2asm.php.
 // Pixels where space characters are, will be off. Any other than space will switch on the pixel.
 
 include "fonttab.php";
 
-$ret = 
+$ret =
 "; -----------------------------------------------------------
 ; Assambly font definitions. Generated from font_visual.php.
 ; These are already in I2C command format. Jump to [ascii*11]
@@ -39,8 +39,5 @@ foreach($font_8x8_array as $code => $char){
 
 $ret .= "\nfonttab_len     equ     $-fonttab\n\n";
 file_put_contents("fonttab.inc",$ret);
-
-
-
 
 ?>
