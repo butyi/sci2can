@@ -1,20 +1,20 @@
 ; ==============================================================================
-;                          MINI LAUSCH BOX 
+;                          MINI LAUSCH BOX
 ; ==============================================================================
 ; Hardware: https://github.com/butyi/sci2can/
-; Software: janos.bencsik@knorr-bremse.com, 2020.05.23. 
+; Software: janos.bencsik@knorr-bremse.com, 2020.05.23.
 ; ==============================================================================
 #include "dz60.inc"
 ; ===================== CONFIG =================================================
 
 APPLICATION     equ     0       ; Gateway applications ID (0: github example)
-SW_REV          equ     1       ; Software revison
+SW_REV          equ     2       ; Software revison
 BUILD_DATE_YH   equ     $20     ; ${:year/100}
-BUILD_DATE_YL   equ     $20     ; ${:year-2000}
-BUILD_DATE_MO   equ     $06     ; ${:month}
-BUILD_DATE_DA   equ     $28     ; ${:date}     
-BUILD_DATE_HO   equ     $14     ; ${:hour}
-BUILD_DATE_MI   equ     $18     ; ${:min}
+BUILD_DATE_YL   equ     $21     ; ${:year-2000}
+BUILD_DATE_MO   equ     $02     ; ${:month}
+BUILD_DATE_DA   equ     $26     ; ${:date}
+BUILD_DATE_HO   equ     $18     ; ${:hour}
+BUILD_DATE_MI   equ     $50     ; ${:min}
 ;OSCILL_SUPP     equ     1       ; To switch on oscillator support
 
 BUFFLEN         equ     96      ; Number of bytes in received burst
@@ -46,7 +46,7 @@ OSC_CANIT       @pin    PTD,5   ; Pin is high during CAN Tx Interrupt routine
 #include "mcg.sub"
 #include "rtc.sub"
 #include "iic.sub"
-#include "ssd1780.sub"          ; 0.96" 128x64 OLED display 
+#include "ssd1780.sub"          ; 0.96" 128x64 OLED display
 #include "lib.sub"
 #include "sci.sub"
 #include "can.sub"
@@ -75,7 +75,7 @@ start:
         jsr     SCI_Init
         jsr     IIC_Init        ; Init IIC for fast clear (~100khz)
         bsr     ADC_Init
-        
+
         cli                     ; Enable interrupts
 
         clr     uz
@@ -96,15 +96,15 @@ main
         brset   EVERY1SEC.,timeevents,m_onesec ; Check if 1s spent
 
         lda     BTNL            ; Check once button was pressed
-        and     #BTNL_|BTNR_
         eor     btns
+        and     #BTNL_|BTNR_
         bne     m_btn_event     ; In case of edge, jump to handle
 
         mov     #PIN5.,ADCSC1   ; Start Uz voltage measurement
 m_meas
         jsr     KickCop         ; Update watchdog
-        brclr   COCO.,ADCSC1,m_meas ; Wait for finish Uz measurement 
-        
+        brclr   COCO.,ADCSC1,m_meas ; Wait for finish Uz measurement
+
         ldx     #0              ; Load uz to arit32
         stx     arit32
         stx     arit32+1
@@ -112,15 +112,15 @@ m_meas
         sta     arit32+2
         lda     uz+1
         sta     arit32+3
-        
+
         stx     yy              ; *=255
         stx     yy+1
         stx     yy+2
         lda     #255
         sta     yy+3
-        
+
         jsr     szor16bit
-        
+
         ldx     #0              ; /=256
         stx     yy
         stx     yy+1
@@ -135,7 +135,7 @@ m_meas
         sta     uz+1
         lda     arit32+2
         adc     #0
-        sta     uz              ; Save back to uz 
+        sta     uz              ; Save back to uz
 
         bra     main            ; Repeat main cycle
 
@@ -153,28 +153,28 @@ m_onesec                        ; This path called once in every sec
 ;        ldx     #10             ; /=10  ;My prototype
         ldx     #30             ; /=30
         div
-        
+
         clrh
         ldx     #1              ; Length of fractional part is 1 digit
         mov     #5,str_bufidx   ; Set length of string
         jsr     str_val         ; Convert value to string
-        lda     #$26            ; Screen position        
+        lda     #$26            ; Screen position
         jsr     DISP_print      ; Print string
 
-        ; Update SCI status 
+        ; Update SCI status
         ldhx    #ok_err_str
         brclr   SCIPACK_LED.,led_flags,m_sci_err
         aix     #2
 m_sci_err
-        lda     #$45            ; Screen position        
+        lda     #$45            ; Screen position
         jsr     DISP_print      ; Print string
-        
-        ; Update CAN status 
+
+        ; Update CAN status
         ldhx    #ok_err_str
         brclr   CANSENT_LED.,led_flags,m_can_err
         aix     #2
 m_can_err
-        lda     #$4E            ; Screen position        
+        lda     #$4E            ; Screen position
         jsr     DISP_print      ; Print string
 
         jmp     main
@@ -188,20 +188,20 @@ m_btn_event                     ; Button state changed
         beq     m_btnl_err
         aix     #4
 m_btnl_err
-        lda     #$72            ; Screen position        
+        lda     #$72            ; Screen position
         jsr     DISP_print      ; Print string
-        
+
         ldhx    #btn_str        ; Just show the new state, no real function yet
         lda     BTNR
         and     #BTNR_
         beq     m_btnr_err
         aix     #4
 m_btnr_err
-        lda     #$7B            ; Screen position        
+        lda     #$7B            ; Screen position
         jsr     DISP_print      ; Print string
-        
+
         jmp     main
-        
+
 ; ===================== STRINGS ================================================
 
 hexakars
@@ -213,7 +213,7 @@ startscreen
         db "                "
         db " SCI ?    CAN ? "
         db "                "
-        db "Build 2006281418"
+        db "Build 2102261850"
         db "                "
         db 0
 ok_err_str
@@ -270,7 +270,7 @@ PTX_Init
 
 ; ===================== IT VECTORS =============================================
 #VECTORS
-        
+
         org     Vreset
         dw      start
 
