@@ -12,9 +12,9 @@ SW_REV          equ     2       ; Software revison
 BUILD_DATE_YH   equ     $20     ; ${:year/100}
 BUILD_DATE_YL   equ     $21     ; ${:year-2000}
 BUILD_DATE_MO   equ     $02     ; ${:month}
-BUILD_DATE_DA   equ     $26     ; ${:date}
-BUILD_DATE_HO   equ     $18     ; ${:hour}
-BUILD_DATE_MI   equ     $50     ; ${:min}
+BUILD_DATE_DA   equ     $27     ; ${:date}
+BUILD_DATE_HO   equ     $19     ; ${:hour}
+BUILD_DATE_MI   equ     $59     ; ${:min}
 ;OSCILL_SUPP     equ     1       ; To switch on oscillator support
 
 BUFFLEN         equ     96      ; Number of bytes in received burst
@@ -213,7 +213,7 @@ startscreen
         db "                "
         db " SCI ?    CAN ? "
         db "                "
-        db "Build 2102261850"
+        db "Build 2102271959"
         db "                "
         db 0
 ok_err_str
@@ -262,6 +262,8 @@ PTX_Init
         bclr    RxD1_2.,RxD1_2+1        ; RxD1_2 to be input
         bclr    BTNL.,BTNL+1            ; Button to be input
         bclr    BTNR.,BTNR+1            ; Button to be input
+        lda     #BTNL_|BTNR_            ; Buttons to be pulled up
+        sta     PTEPE                   ;  to prevent instable state when not mounted
         lda     #RxD1_2_
         sta     PTAPE                   ; RxD1_2 to be pulled up
 
