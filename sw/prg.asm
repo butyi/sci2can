@@ -12,9 +12,9 @@ SW_REV          equ     2       ; Software revison
 BUILD_DATE_YH   equ     $20     ; ${:year/100}
 BUILD_DATE_YL   equ     $21     ; ${:year-2000}
 BUILD_DATE_MO   equ     $02     ; ${:month}
-BUILD_DATE_DA   equ     $27     ; ${:date}
-BUILD_DATE_HO   equ     $19     ; ${:hour}
-BUILD_DATE_MI   equ     $59     ; ${:min}
+BUILD_DATE_DA   equ     $28     ; ${:date}
+BUILD_DATE_HO   equ     $09     ; ${:hour}
+BUILD_DATE_MI   equ     $30     ; ${:min}
 ;OSCILL_SUPP     equ     1       ; To switch on oscillator support
 
 BUFFLEN         equ     96      ; Number of bytes in received burst
@@ -78,9 +78,9 @@ start:
 
         cli                     ; Enable interrupts
 
-        clr     uz
+        clr     uz              ; Init uz variable
         clr     uz+1
-        clr     btns
+        jsr     update_btns     ; Init btns variable
 
         jsr     IIC_wfe         ; Wait for end of action list
         jsr     DISP_init       ; Initialize display
@@ -95,9 +95,7 @@ main
 
         brset   EVERY1SEC.,timeevents,m_onesec ; Check if 1s spent
 
-        lda     BTNL            ; Check once button was pressed
-        eor     btns
-        and     #BTNL_|BTNR_
+        jsr     update_btns     ; Test button change
         bne     m_btn_event     ; In case of edge, jump to handle
 
         mov     #PIN5.,ADCSC1   ; Start Uz voltage measurement
@@ -180,10 +178,8 @@ m_can_err
         jmp     main
 
 m_btn_event                     ; Button state changed
-        mov     BTNL,btns       ; Save new state
-
         ldhx    #btn_str        ; Just show the new state, no real function yet
-        lda     BTNL
+        lda     btns
         and     #BTNL_
         beq     m_btnl_err
         aix     #4
@@ -192,7 +188,7 @@ m_btnl_err
         jsr     DISP_print      ; Print string
 
         ldhx    #btn_str        ; Just show the new state, no real function yet
-        lda     BTNR
+        lda     btns
         and     #BTNR_
         beq     m_btnr_err
         aix     #4
@@ -213,7 +209,7 @@ startscreen
         db "                "
         db " SCI ?    CAN ? "
         db "                "
-        db "Build 2102271959"
+        db "Build 2102280930"
         db "                "
         db 0
 ok_err_str
@@ -245,8 +241,8 @@ PTX_Init
         sta     PTE
         sta     PTF
         sta     PTG
-        bset    CANTX.,CANTX            ; CANTX to be high
-        bset    LED2.,LED2              ; LED2 to be On
+        bset    CANTX.,CANTX    ; CANTX to be high
+        bset    LED2.,LED2      ; LED2 to be On
 
         ; All ports to be output
         lda     #$FF
@@ -257,16 +253,26 @@ PTX_Init
         sta     DDRE
         sta     DDRF
         sta     DDRG
-        bclr    CANRX.,CANRX+1          ; CANRX to be input
-        bclr    RxD1.,RxD1+1            ; RxD1 to be input
+        bclr    CANRX.,CANRX+1  ; CANRX to be input
+        bclr    RxD1.,RxD1+1    ; RxD1 to be input
         bclr    RxD1_2.,RxD1_2+1        ; RxD1_2 to be input
-        bclr    BTNL.,BTNL+1            ; Button to be input
-        bclr    BTNR.,BTNR+1            ; Button to be input
-        lda     #BTNL_|BTNR_            ; Buttons to be pulled up
-        sta     PTEPE                   ;  to prevent instable state when not mounted
+        bclr    BTNL.,BTNL+1    ; Button to be input
+        bclr    BTNR.,BTNR+1    ; Button to be input
+        lda     #BTNL_|BTNR_    ; Buttons to be pulled up
+        sta     PTEPE           ;  to prevent instable state when not mounted
         lda     #RxD1_2_
-        sta     PTAPE                   ; RxD1_2 to be pulled up
+        sta     PTAPE           ; RxD1_2 to be pulled up
 
+        rts
+
+update_btns
+        lda     BTNL            ; Load current button state
+        coma                    ; Change polarity to active low
+        and     #BTNL_|BTNR_    ; Mask bits of two buttons
+        tax                     ; Update btns later with this value
+        eor     btns            ; Detect state change comparing to last value still in btns
+        stx     btns            ; Update btns now with before saved value
+        tsta                    ; Update status register with A to report any button edge
         rts
 
 
