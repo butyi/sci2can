@@ -198,26 +198,12 @@ enable, faling edge is end of last CAN Tx interrupt.
 
 ### Download
 
-Since I haven't written downloader/bootloader for DZ family yet, I use USBDM.
+I have already written [downloader/bootloader for DZ family](https://github.com/butyi/dzbl/).
 
-USBDM Hardware interface is cheap. I have bought it for 10€ on Ebay.
-Just search "USBDM S08".
-
-![USBDM](https://github.com/butyi/sci2can/raw/master/pics/myusbdm.png)
-
-USBDM has free software tool support for S08 microcontrollers.
-You can download it from [here](https://sourceforge.net/projects/usbdm/).
-When you install the package, you will have Flash Downloader tools for several
-target controllers. Once is for S08 family. This is the window of S08 tool:
-
-![Downloader](https://github.com/butyi/sci2can/raw/master/pics/flash_programmer_window.png)
-
-It is much more comfortable and faster to call the download from command line.
-Just run my bash file `./p`.
-
-I got message `Gtk-Message: Failed to load module "canberra-gtk-module"`.
-solution was `sudo apt-get install libcanberra-gtk-module`.
-
+- First download the bootloader (dzbl/prg.s19) by [USBDM](https://sourceforge.net/projects/usbdm/)
+- Create CAN or SCI connection between MCU and PC
+- Copy `dzdl.py` to `~/bin/` folder and add executable attribute by `chmox +x ~/bin/dzdl.py`. This is only needed once.
+- Run bash file `./p`.
 
 ## Hardware
 
@@ -259,7 +245,8 @@ Refer to
 External Crystal is used for better CAN performances, this is proposed
 by uC manufacturer. Passive parts around are also according to datasheet and
 similar to development board circuit.
-4MHz is enough up to CAN baud rate 500k. For 1Mbaud 8MHz Crystal is needed.
+4MHz is enough up to CAN baud rate 500k when external clock is selected.
+For 1Mbaud support I selected rather bus clock of bootloader (16MHz), even though external crystal is proposed.
 Crystal is now pin type, since via is need anyway, now the pins holes are vias.
 
 ### Connector
@@ -291,11 +278,11 @@ interface which I use. Single pin communication line (BKGD) has external pull
 up resistor, even if it is not necessary.
 Reset pin has simple external pull up resistor and filter capacitor.
 This port is only needded for software update.
-The connector contains 4 extra pins. Details are below.
+The connector contains extra pins. Details are below.
 
 ### SCI input
 
-SCI input is connected to RX pin of SCI1 module. There are serial resistors
+SCI input is connected to RX pin of SCI2 module. There are serial resistors
 for protection against its connection to 24V.
 Next is Ui1 74HC1G125GW as impedance adapter. This provides much higher impedance
 input than uC pin.
@@ -377,6 +364,9 @@ PTA5 analogue measurement capable port. With this parts supply voltage can
 be measured by the software and used for any purpose.
 
 #### BDM extra pins
+
+The original 6 pins connector contains also SCI1 Rx and Tx pins.
+This is designed to be used for software update and debug terminal.
 
 I have extended the debugger connector by 4 additional pins. These are now
 the IIC/SPI pins as preparation to connect some IIC or SPI display to board.
