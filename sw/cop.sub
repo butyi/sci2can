@@ -1,6 +1,9 @@
 ; ===================== Sub-Routines ==========================================
 #ROM
 
+; Function is public service of bootloader
+KickCop	def     $EB00   ; Function to fresh watchdog without damage any register
+
 ; ------------------------------------------------------------------------------
 ; Computer Operating Properly (COP) Watchdog
 COP_Init
@@ -20,14 +23,5 @@ COP_Init
         sta     SOPT1
         rts
         
-        ; Refresh Watchdog
-KickCop
-        psha                    ; Save A, because function will change it
-        lda       #$55          ; First pattern $55
-        sta       COP
-        coma                    ; Second pattern $AA
-        sta       COP
-        pula                    ; Restore original content of A
-        rts
 
 

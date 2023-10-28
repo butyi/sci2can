@@ -1,2 +1,3 @@
 #!/bin/bash
-UsbdmFlashProgrammer -target=hcs08 -device=MC9S08DZ60 -program -masserase -security:image -execute prg.s19
+#UsbdmFlashProgrammer -target=hcs08 -device=MC9S08DZ60 -program -masserase -security:image -execute prg.s19
+dzdl.py -f prg.s19

@@ -1,24 +1,45 @@
+; ====================  CONSTANTS  =============================================
+
+EESCIBAUD       def     $17D0   ; Lausch SCI BaudRate setting in EEPROM. 
+				; Note, this is different from bootloader baudrate,
+				; because such fast speed like 250k, 500k are not working with USB-RS232 converters.
+
 ; ====================  VARIABLES  =============================================
 #RAM
 
 sci_ptr         ds      1       ; Pointer for fill up sci_buffer from SCI
+sci_nob         ds      1       ; Number of bytes, value is kept till next sci idle
 
 #XRAM
 
-sci_buffer      ds      BUFFLEN+10 ; Data buffer with 10 extra bytes
+sci_buffer      ds      MAXBUFFLEN+10 ; Data buffer with 10 extra bytes
 
 ; ===================== SUB-ROUTINES ===========================================
 #ROM
-
+sci_config
+        org     EESCIBAUD
+;        db      $FF             ; Default 57600 baud rate is used, but can be changed by EEPROM update by application
+;        db      1               ; 1000k - 0%
+;        db      2               ; 500k - 0%
+;        db      4               ; 250k - 0%	Set this baud rate as default after software download, to be software backward compatible
+;        db      5               ; 200k - 0%
+        db      9               ; 115200 - 3.68%
+;        db      17              ; 57600 - 2.08%
+;        db      26              ; 38400 - 0.16%
+;        db      52              ; 19200 - 0.16%
+;        db      104             ; 9600 - 0.16%
+	org	sci_config
 ; ------------------------------------------------------------------------------
 ; Serial Communications Interface (S08SCIV4)
-; Init SCI to receive serial data with baud rate 125k
+; Init SCI to receive serial data with baud rate 115.2k
 SCI_Init
         clr     SCI1BDH
-        mov     #4,SCI1BDL      ; Baud (8MHz / 16 / 4 = 125k )
+        lda     EESCIBAUD       ; Load baud rate prescaler from EEPROM, same as bootloader uses
+        sta     SCI1BDL
         mov     #RE_|RIE_|ILIE_,SCI1C2 ; Rx enable with IT
         clr     sci_ptr         ; Init buffer pointer of SCI
         clr     can_ptr         ; Init buffer pointer of CAN
+        clr     sci_nob
         rts
         
 ; SCI RX interrupt service.
@@ -44,7 +65,7 @@ SCIRX_IT
 SCIRX_IT_char
         clrh                    ; H not needed for short pointer
         ldx     sci_ptr         ; X = sci_ptr
-        cmp     #BUFFLEN        ; Check number of already received bytes
+        cmp     #MAXBUFFLEN     ; Check number of already received bytes
         bhs     SCIRX_IT_much   ; Too much byte, not needed
         lda     SCI1D           ; Load received byte
         sta     sci_buffer,x    ; Store in sci_buffer[sci_ptr]
@@ -60,12 +81,14 @@ SCIRX_IT_idle
         lda     SCI1D           ; Load data register, needed to clear IDLE
         clr     can_ptr
         lda     sci_ptr         ; Check if num of received bytes
-        cmp     #BUFFLEN        ;  are a complete pack
+        cmp     #MINBUFFLEN     ;  are an enough long pack
         blo     SCIRX_IT_incomplete ; If not, skip CAN TX
         bset    SCIPACK_REQ.,led_flags ; Notify received complete SCI burst
 #ifdef OSCILL_SUPP
         bset    OSC_CANTX.,OSC_CANTX ; Set debug measure pin
 #endif
+        lda     sci_ptr         ; Num of received bytes
+        sta     sci_nob         ; inform CAN about number of bytes to be transmited
         lda     #1              ; Enable TX_IT for first CAN Tx buffer
         sta     CANTIER         ;  to start CAN transmission
 SCIRX_IT_incomplete        

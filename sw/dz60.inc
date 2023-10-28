@@ -953,7 +953,7 @@ EEPROM_END          equ       $17FF               ;visible through this window
 #endif
 
 ROM                 def       TRUE_ROM
-ROM_END             equ       $FF9F               ;end of all flash (before NV registers and fixed vectors)
+ROM_END             equ       $FFAF               ;end of all flash (before NV registers and fixed vectors)
 
 #ifdef BOOT&BOOTROM
 ROM_END             set       BOOTROM-1
@@ -1010,8 +1010,8 @@ HZ                  def       32000000            ;Cyclone 31250*1024
 
 
           #ifndef BOOT
-                    org       NVPROT              ;NV flash protection byte
-                    fcb       ?NVPROT_MASK        ;NVPROT transfers to FPROT on reset
+;                    org       NVPROT              ;NV flash protection byte
+;                    fcb       ?NVPROT_MASK        ;NVPROT transfers to FPROT on reset
 
           #ifndef NVOPT_VALUE
                     #Message  Using default NVOPT_VALUE (no vector redirection)
@@ -1025,8 +1025,8 @@ NVOPT_VALUE         def       %11100010           ;NVFEOPT transfers to FOPT on 
                              ; |+----------------- FNORED - Vector Redirection Disable (No Redirection)
                              ; +------------------ KEYEN - Backdoor key mechanism enable
 
-                    org       NVOPT               ;NV flash options byte
-                    fcb       NVOPT_VALUE         ;NVFEOPT transfers to FOPT on reset
+;                    org       NVOPT               ;NV flash options byte
+;                    fcb       NVOPT_VALUE         ;NVFEOPT transfers to FOPT on reset
           #endif
 ;                   org       NVICSTRIM           ;NV ICS Trim Setting
 ;                   fcb       ??                  ;ICG trim value measured during factory test. User software optionally

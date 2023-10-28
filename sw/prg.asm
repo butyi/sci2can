@@ -2,22 +2,25 @@
 ;                          MINI LAUSCH BOX
 ; ==============================================================================
 ; Hardware: https://github.com/butyi/sci2can/
-; Software: janos.bencsik@knorr-bremse.com, 2020.05.23.
+; Software: https://github.com/butyi/sci2can/
 ; ==============================================================================
 #include "dz60.inc"
 ; ===================== CONFIG =================================================
 
+;MY_PROTOTYPE	def	1       ; Define for my first prototype hardware
+
 APPLICATION     equ     0       ; Gateway applications ID (0: github example)
-SW_REV          equ     2       ; Software revison
+SW_REV          equ     3       ; Software revison
 BUILD_DATE_YH   equ     $20     ; ${:year/100}
-BUILD_DATE_YL   equ     $21     ; ${:year-2000}
-BUILD_DATE_MO   equ     $02     ; ${:month}
+BUILD_DATE_YL   equ     $23     ; ${:year-2000}
+BUILD_DATE_MO   equ     $10     ; ${:month}
 BUILD_DATE_DA   equ     $28     ; ${:date}
-BUILD_DATE_HO   equ     $09     ; ${:hour}
-BUILD_DATE_MI   equ     $30     ; ${:min}
+BUILD_DATE_HO   equ     $22     ; ${:hour}
+BUILD_DATE_MI   equ     $21     ; ${:min}
 ;OSCILL_SUPP     equ     1       ; To switch on oscillator support
 
-BUFFLEN         equ     96      ; Number of bytes in received burst
+MAXBUFFLEN      equ     200     ; Max number of bytes in received burst (20 CAN messages)
+MINBUFFLEN      equ     10      ; Min number of bytes in received burst (1 CAN messages)
 
 ; uC port definitions with line names in schematic
 LED2            @pin    PTA,6
@@ -26,10 +29,13 @@ CANTX           @pin    PTE,6
 RxD1            @pin    PTE,1
 RxD1_2          @pin    PTA,0
 FET             @pin    PTD,2
-;BTNL            @pin    PTA,2  ; My prototype
-;BTNR            @pin    PTA,1  ; My prototype
+#ifdef MY_PROTOTYPE
+BTNL            @pin    PTA,2  ; My prototype
+BTNR            @pin    PTA,1  ; My prototype
+#else
 BTNL            @pin    PTE,3
 BTNR            @pin    PTE,2
+#endif
 
 #ifdef OSCILL_SUPP
 ; Debug pins to measure execution times (high level) by oscilloscope
@@ -39,6 +45,10 @@ OSC_RTCIT       @pin    PTD,3   ; Pin is high during RTC Interrupt routine
 OSC_SCIIT       @pin    PTD,4   ; Pin is high during SCI Rx Interrupt routine
 OSC_CANIT       @pin    PTD,5   ; Pin is high during CAN Tx Interrupt routine
 #endif
+
+BLCR            def     $FFAC           ; $FF (erased) is default settings
+                ; bitnum BLCR_ET,0      ; Enable Terminal
+                ; bitnum BLCR_ET,1      ; Enable Welcome string on SCI
 
 ; ===================== INCLUDE FILES ==========================================
 
@@ -61,15 +71,16 @@ btns            ds      1       ; Saved button states to detect change
 ; ====================  PROGRAM START  =========================================
 #ROM
 
+bl_config
+        org     BLCR            ; BootLoader Configuration Register
+        db      $FE             ; Disable Terminal and enable Welcome
+        org	bl_config
+
 start:
         sei                     ; disable interrupts
 
-        ldhx    #XRAM_END       ; H:X points to SP
-        txs                     ; Init SP
-
-        jsr     COP_Init
+	jsr	COP_Init
         jsr     PTX_Init        ; I/O ports initialization
-        jsr     MCG_Init
         jsr     RTC_Init
         jsr     CAN_Init
         jsr     SCI_Init
@@ -142,14 +153,20 @@ m_onesec                        ; This path called once in every sec
 
         lda     uz              ; Load high byte
 
-;        ldx     #18             ; *=18  ;My prototype
+#ifdef MY_PROTOTYPE
+        ldx     #18             ; *=18  ;My prototype
+#else
         ldx     #55             ; *=55
+#endif
         mul
 
         pshx
         pulh
-;        ldx     #10             ; /=10  ;My prototype
+#ifdef MY_PROTOTYPE
+        ldx     #10             ; /=10  ;My prototype
+#else
         ldx     #30             ; /=30
+#endif
         div
 
         clrh
@@ -209,7 +226,7 @@ startscreen
         db "                "
         db " SCI ?    CAN ? "
         db "                "
-        db "Build 2102280930"
+        db "Build {:year-2000}{:month(Z2)}{:date(Z2)}{:hour(Z2)}{:min(Z2)}"
         db "                "
         db 0
 ok_err_str

@@ -76,11 +76,11 @@ IIC_beg
 ; IIC initalization and for waiting for call IIC_ec to start in Master mode
 IIC_Init
         mov     #IICEN_,IICC            ; Switch ON IIC
-        mov     #MULT1_|$07,IICF        ; 8MHz / (4*40) ~= 50kHz
+        mov     #MULT1_|$14,IICF        ; 16MHz / (4*80) ~= 50kHz
         mov     #SRW_,IICS              ; R/W bit = 0
         rts
 IIC_Slow
-        mov     #MULT1_|$1E,IICF        ; 8MHz / (4*192) ~= 10kHz
+        mov     #MULT1_|$29,IICF        ; 16MHz / (4*384) ~= 10kHz
         rts
 
 ; ------------------------------------------------------------------------------

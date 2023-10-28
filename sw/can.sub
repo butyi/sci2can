@@ -1,3 +1,11 @@
+; ====================  CONSTANTS  =============================================
+
+; EECANBTR0 (EECANBAUD+0): SJW = 1...4 Tq, Prescaler value = 1...64.
+; EECANBTR1 (EECANBAUD+1): Sample per bit = 1 or 3, Tseg2 = 1...8 Tq, Tseg1 = 1...16 Tq
+; Baud = fCANCLK / Prescaler / (1 + Tseg1 + Tseg2)
+; Sample point = (1 + Tseg1)/(1 + Tseg1 + Tseg2)
+EECANBAUD       def     $17E8   ; CAN BaudRate settings in EEPROM, same with bootloader
+
 ; ====================  VARIABLES  =============================================
 #RAM
 
@@ -6,48 +14,68 @@ can_ptr         ds      1       ; Pointer for read data from sci_buffer to CAN
 ; ===================== SUB-ROUTINES ===========================================
 #ROM
 
+;can_config      ; Config in EEPROM.
+;        org     EECANBAUD
+;        db      $00,$3A         ; Baud = 16MHz / 1 / (1+11+4) = 1M. Sample point = (1+11)/(1+11+4) = 87.5%
+;        db      $01,$3A         ; Baud = 16MHz / 2 / (1+11+4) = 500k. Sample point = (1+11)/(1+11+4) = 87.5%
+;        db      $03,$3A         ; Baud = 16MHz / 4 / (1+11+4) = 250k. Sample point = (1+11)/(1+11+4) = 87.5%
+;        db      $07,$3A         ; Baud = 16MHz / 8 / (1+11+4) = 125k. Sample point = (1+11)/(1+11+4) = 87.5%
+;        org     can_config
+
 ; ------------------------------------------------------------------------------
 ; Freescale Controller Area Network (S08MSCANV1)
-; Set up CAN for 250 kbit/s using 4 MHz external clock
+; Set up CAN using 16 MHz bus clock
 ; CAN will use in interrupt mode, but init does not enable interrupt.
 ; It will be enabled when transmission can be started, so when
 ; all bytes have been received from SCI.
-;
-;   Baud = fCANCLK / Prescaler / (1 + Tseg1 + Tseg2) = 
-;     4MHz / 2 / (1+5+2) = 250k 
-;   Sample point = 75% 
-;     (1 + Tseg1)/(1 + Tseg1 + Tseg2) = (1+5)/(1+5+2) = 0.75
 CAN_Init
-        ; MSCAN Enable
-        lda     #CAN_CANE_
+        ; MSCAN Enable, CLKSRC=1 use BusClk(16MHz), BORM=0 auto busoff recovery, SLPAK=0 no sleep
+        lda     #CAN_CANE_|CAN_CLKSRC_
         sta     CANCTL1
 
-        ; Wait for Initialization Mode Acknowledge
-ican1
-        lda     CANCTL1
-        and     #CAN_INITAK_
-        beq     ican1
+        jsr     CAN_EnterInit
 
-        ; SJW = 1 Tq, Prescaler value (P) = 2
-        lda     #1
+        ais     #-2             ; Reserve two bytes in stack for baud rate bytes 
+
+        ; Check two bytes in EEPROM. If any has value $FF, both to be forced to valid 500kbaud value.
+        clrx
+        lda     EECANBAUD+0     ; Read value from EEPROM
+        sta     1,sp            ; Save value for later use
+        coma                    ; convert $FF to $00
+        bne     can_btr_0_ok    ; jump id not zero, fo value is not $FF
+        incx                    ; Count number of $FF value in X 
+can_btr_0_ok
+        lda     EECANBAUD+1     ; Read value from EEPROM
+        sta     2,sp            ; Save value for later use
+        coma                    ; convert $FF to $00
+        bne     can_btr_1_ok    ; jump id not zero, fo value is not $FF
+        incx                    ; Count number of $FF value in X 
+can_btr_1_ok
+        tstx                    ; update CCR with value of X
+        beq     can_btr_ok      ; jump if there was no $FF value in EEPROM
+        lda     #$01            ; Default 500kbaud value 
+        sta     1,sp 
+        lda     #$3A            ; Default 500kbaud value 
+        sta     2,sp
+can_btr_ok
+        bne     can_btr_0_ok
+        clra                    ; Default 500kbaud value 
+
+        ; SJW = 1...4 Tq, Prescaler value = 1...64
+        lda     1,sp
         sta     CANBTR0
         
-        ; One sample per bit, Tseg2 = 2, Tseg1 = 5
-        lda     #$14
+        ; One sample per bit, Tseg2 = 1...8 Tq, Tseg1 = 1...16 Tq
+        lda     2,sp
         sta     CANBTR1
 
-        ; Leave Initialization Mode
-        clra
-        sta     CANCTL0
+        ais     #2              ; Free up two baud rate bytes from stack  
 
-        ; Wait for exit Initialization Mode Acknowledge
-ican2
-        lda     CANCTL1
-        and     #CAN_INITAK_
-        bne     ican2
+        ; Leave Initialization Mode
+        bsr	CAN_ExitInit
 
         ; Send info message
-        
+
         ; Select first buffer
         lda     #1
         sta     CANTBSEL
@@ -86,6 +114,27 @@ ican2
         lda     CANTBSEL
         sta     CANTFLG
 
+        rts
+
+CAN_EnterInit
+        ; Request init mode
+        lda     #CAN_INITRQ_
+        sta     CANCTL0
+CAN_ChkEnterInit
+        ; Wait for Initialization Mode Acknowledge
+        lda     CANCTL1
+        and     #CAN_INITAK_
+        beq     CAN_ChkEnterInit
+        rts
+
+CAN_ExitInit
+        ; Leave Initialization Mode
+        clra
+        sta     CANCTL0
+CAN_ChkExitInit			; Wait for exit Initialization Mode Acknowledge
+        lda     CANCTL1
+        and     #CAN_INITAK_
+        bne     CAN_ChkExitInit
         rts
 
 
@@ -145,7 +194,7 @@ CAN_TX_IT
         add     #10
         sta     can_ptr
         ; Check if last message was sent
-        cmp     #BUFFLEN
+        cmp     sci_nob
         blo     CAN_TX_IT_1
         ; Disable interrupt to stop CAN transmission
         lda     #0
